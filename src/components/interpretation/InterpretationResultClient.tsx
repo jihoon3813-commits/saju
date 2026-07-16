@@ -19,6 +19,73 @@ import { StructuredInterpretation } from "@/lib/ai/types";
 import { Button } from "@/components/ui/Button";
 import { AdSlot } from "@/components/ads/AdSlot";
 
+const getOhengInfo = (char: string) => {
+  const wood = new Set(["甲", "乙", "寅", "卯", "목", "나무"]);
+  const fire = new Set(["丙", "丁", "巳", "午", "화", "불"]);
+  const earth = new Set(["戊", "己", "辰", "戌", "丑", "未", "토", "흙"]);
+  const metal = new Set(["庚", "辛", "申", "酉", "금", "쇠"]);
+  const water = new Set(["壬", "癸", "亥", "子", "수", "물"]);
+
+  if (wood.has(char)) return { label: "목(木)", bg: "bg-emerald-50/60 text-emerald-800 border-emerald-200/60" };
+  if (fire.has(char)) return { label: "화(火)", bg: "bg-rose-50/60 text-rose-800 border-rose-200/60" };
+  if (earth.has(char)) return { label: "토(土)", bg: "bg-amber-50/60 text-amber-800 border-amber-200/60" };
+  if (metal.has(char)) return { label: "금(金)", bg: "bg-slate-50/70 text-slate-800 border-slate-300/60" };
+  if (water.has(char)) return { label: "수(水)", bg: "bg-indigo-50/60 text-indigo-900 border-indigo-200/60" };
+  return { label: "", bg: "bg-slate-50 border-slate-100" };
+};
+
+const renderHighlightContent = (title: string, value: string) => {
+  if (title.includes("오행")) {
+    const parts = value.split(",").map(p => p.trim());
+    return (
+      <div className="space-y-3 mt-1.5 w-full">
+        <div className="flex flex-wrap gap-1.5">
+          {parts.map((part, idx) => {
+            const match = part.match(/^([가-힣]+)\((\d+)\)$/);
+            if (match) {
+              const name = match[1];
+              const count = parseInt(match[2]);
+              const oheng = getOhengInfo(name);
+              return (
+                <div key={idx} className={`px-3 py-1 rounded-full border text-[11px] font-extrabold flex items-center space-x-1.5 ${oheng.bg}`}>
+                  <span>{name}</span>
+                  <span className="px-1.5 py-0.2 bg-white/70 rounded-full text-[10px] text-slate-800">{count}</span>
+                </div>
+              );
+            }
+            return (
+              <span key={idx} className="px-2.5 py-0.5 bg-slate-100 rounded-full text-[11px] font-bold text-slate-600 border border-slate-200">
+                {part}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  if (title.includes("기운") || title.includes("일간")) {
+    const hanjaMatch = value.match(/^([A-Za-z가-힣一-龥]+)/);
+    const hanja = hanjaMatch ? hanjaMatch[1] : "";
+    const oheng = getOhengInfo(hanja);
+
+    return (
+      <div className="space-y-2 mt-1.5">
+        <div className="flex items-center space-x-2.5">
+          {hanja && (
+            <span className={`w-8 h-8 rounded-full border flex items-center justify-center font-black text-sm shadow-xs ${oheng.bg}`}>
+              {hanja[0]}
+            </span>
+          )}
+          <p className="text-base font-extrabold text-slate-800 leading-snug">{value}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <p className="text-base font-bold text-slate-800 leading-snug mt-1.5">{value}</p>;
+};
+
 interface InterpretationResultClientProps {
   profileId: string;
   profileId2?: string;
@@ -260,33 +327,54 @@ export function InterpretationResultClient({
               </span>
             </div>
 
-            <div className="grid grid-cols-4 gap-2 text-center">
+            <div className="grid grid-cols-4 gap-2.5 text-center">
               {[
                 { label: "시주 (Hour)", val: chart.pillars.hour },
                 { label: "일주 (Day)", val: chart.pillars.day, isSelf: true },
                 { label: "월주 (Month)", val: chart.pillars.month },
                 { label: "년주 (Year)", val: chart.pillars.year }
-              ].map((p, idx) => (
-                <div key={idx} className={`p-3 rounded-2xl border ${p.isSelf ? 'bg-indigo-50/50 border-indigo-200/50' : 'bg-slate-50/50 border-slate-100'} space-y-1`}>
-                  <span className="text-[10px] text-slate-400 block font-medium">{p.label}</span>
-                  {p.val ? (
-                    <div className="font-extrabold text-base md:text-lg text-slate-800">
-                      <span className="block">{p.val.stem}</span>
-                      <span className="block mt-0.5 text-slate-600 font-semibold">{p.val.branch}</span>
-                    </div>
-                  ) : (
-                    <span className="text-slate-400 text-xs block py-2">시각미상</span>
-                  )}
-                </div>
-              ))}
+              ].map((p, idx) => {
+                const stemOheng = p.val ? getOhengInfo(p.val.stem) : null;
+                const branchOheng = p.val ? getOhengInfo(p.val.branch) : null;
+                return (
+                  <div 
+                    key={idx} 
+                    className={`p-2.5 md:p-3 rounded-2xl border transition-all duration-300 ${
+                      p.isSelf 
+                        ? 'bg-amber-50/15 border-gold/45 shadow-sm ring-1 ring-gold/25' 
+                        : 'bg-slate-50/30 border-slate-100/80 hover:border-indigo-100'
+                    } space-y-2`}
+                  >
+                    <span className="text-[9px] md:text-[10px] text-slate-400 block font-extrabold uppercase tracking-wide">{p.label}</span>
+                    {p.val ? (
+                      <div className="space-y-1.5 font-mono">
+                        {/* 천간 카드 */}
+                        <div className={`p-1.5 md:p-2 rounded-xl border text-center ${stemOheng?.bg} shadow-xs`}>
+                          <span className="block text-base md:text-lg font-black">{p.val.stem}</span>
+                          <span className="block text-[8px] md:text-[9px] font-black opacity-80 mt-0.5">{stemOheng?.label}</span>
+                        </div>
+                        {/* 지지 카드 */}
+                        <div className={`p-1.5 md:p-2 rounded-xl border text-center ${branchOheng?.bg} shadow-xs`}>
+                          <span className="block text-base md:text-lg font-black">{p.val.branch}</span>
+                          <span className="block text-[8px] md:text-[9px] font-black opacity-80 mt-0.5">{branchOheng?.label}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-slate-300 text-xs font-semibold py-8 border border-dashed border-slate-200 rounded-xl">
+                        시각미상
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           {chart2 && (
-            <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
+            <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4 animate-fade-in">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h4 className="font-bold text-slate-800 flex items-center space-x-2">
-                  <Calendar className="w-4.5 h-4.5 text-indigo-600" />
+                  <Calendar className="w-4.5 h-4.5 text-purple-600" />
                   <span>계산된 상대방 사주 원국 기준 ({chart2.normalizedInput.alias})</span>
                 </h4>
                 <span className="text-xs text-slate-400">
@@ -294,25 +382,46 @@ export function InterpretationResultClient({
                 </span>
               </div>
 
-              <div className="grid grid-cols-4 gap-2 text-center">
+              <div className="grid grid-cols-4 gap-2.5 text-center">
                 {[
                   { label: "시주 (Hour)", val: chart2.pillars.hour },
-                  { label: "일주 (Day)", val: chart2.pillars.day, isSelf: true },
+                  { label: "일주 (Day)", val: chart2.pillars.day, isPartner: true },
                   { label: "월주 (Month)", val: chart2.pillars.month },
                   { label: "년주 (Year)", val: chart2.pillars.year }
-                ].map((p, idx) => (
-                  <div key={idx} className={`p-3 rounded-2xl border ${p.isSelf ? 'bg-indigo-50/50 border-indigo-200/50' : 'bg-slate-50/50 border-slate-100'} space-y-1`}>
-                    <span className="text-[10px] text-slate-400 block font-medium">{p.label}</span>
-                    {p.val ? (
-                      <div className="font-extrabold text-base md:text-lg text-slate-800">
-                        <span className="block">{p.val.stem}</span>
-                        <span className="block mt-0.5 text-slate-600 font-semibold">{p.val.branch}</span>
-                      </div>
-                    ) : (
-                      <span className="text-slate-400 text-xs block py-2">시각미상</span>
-                    )}
-                  </div>
-                ))}
+                ].map((p, idx) => {
+                  const stemOheng = p.val ? getOhengInfo(p.val.stem) : null;
+                  const branchOheng = p.val ? getOhengInfo(p.val.branch) : null;
+                  return (
+                    <div 
+                      key={idx} 
+                      className={`p-2.5 md:p-3 rounded-2xl border transition-all duration-300 ${
+                        p.isPartner 
+                          ? 'bg-purple-50/15 border-purple-300/60 shadow-sm ring-1 ring-purple-300/25' 
+                          : 'bg-slate-50/30 border-slate-100/80 hover:border-purple-100'
+                      } space-y-2`}
+                    >
+                      <span className="text-[9px] md:text-[10px] text-slate-400 block font-extrabold uppercase tracking-wide">{p.label}</span>
+                      {p.val ? (
+                        <div className="space-y-1.5 font-mono">
+                          {/* 천간 카드 */}
+                          <div className={`p-1.5 md:p-2 rounded-xl border text-center ${stemOheng?.bg} shadow-xs`}>
+                            <span className="block text-base md:text-lg font-black">{p.val.stem}</span>
+                            <span className="block text-[8px] md:text-[9px] font-black opacity-80 mt-0.5">{stemOheng?.label}</span>
+                          </div>
+                          {/* 지지 카드 */}
+                          <div className={`p-1.5 md:p-2 rounded-xl border text-center ${branchOheng?.bg} shadow-xs`}>
+                            <span className="block text-base md:text-lg font-black">{p.val.branch}</span>
+                            <span className="block text-[8px] md:text-[9px] font-black opacity-80 mt-0.5">{branchOheng?.label}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-slate-300 text-xs font-semibold py-8 border border-dashed border-slate-200 rounded-xl">
+                          시각미상
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -322,13 +431,13 @@ export function InterpretationResultClient({
       {/* 3. 하이라이트 요약 카드 그리드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {report.highlights.map((h, i) => (
-          <div key={i} className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all flex items-start space-y-0 space-x-4">
-            <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600">
-              {i === 0 ? <Activity className="w-6 h-6" /> : <TrendingUp className="w-6 h-6" />}
+          <div key={i} className="bg-white border border-slate-100/90 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all flex items-start space-y-0 space-x-4">
+            <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 shrink-0">
+              {i === 0 ? <Activity className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
             </div>
-            <div className="space-y-1">
-              <span className="text-xs text-slate-400 font-semibold uppercase">{h.title}</span>
-              <p className="text-base font-bold text-slate-800 leading-snug">{h.value}</p>
+            <div className="space-y-1.5 flex-1 min-w-0">
+              <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">{h.title}</span>
+              {renderHighlightContent(h.title, h.value)}
             </div>
           </div>
         ))}
@@ -343,13 +452,16 @@ export function InterpretationResultClient({
 
         {report.sections.map((sec, idx) => (
           <React.Fragment key={sec.id}>
-            <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all space-y-4">
-              <div>
-                <h4 className="text-lg font-bold text-slate-800">{sec.title}</h4>
-                <p className="text-sm text-indigo-600/80 font-medium mt-1">“{sec.summary}”</p>
+            <div className="bg-gradient-to-b from-white to-slate-50/30 border border-slate-100/80 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-lg transition-all duration-300 space-y-5 relative overflow-hidden">
+              <div className="space-y-1">
+                <span className="text-[10px] text-gold font-bold tracking-widest uppercase block">SECTION 0{idx + 1}</span>
+                <h4 className="text-lg md:text-xl font-black text-slate-900 leading-snug">{sec.title}</h4>
+                <p className="text-xs md:text-sm text-indigo-950 font-extrabold font-serif leading-relaxed border-l-2 border-gold pl-3 mt-2 py-1 bg-indigo-50/15 pr-2 rounded-r-lg">
+                  “{sec.summary}”
+                </p>
               </div>
 
-              <div className="space-y-2 text-slate-600 text-sm leading-relaxed">
+              <div className="space-y-3.5 text-slate-600 text-[13px] md:text-sm leading-relaxed font-medium tracking-wide">
                 {sec.paragraphs.map((para, idx) => (
                   <p key={idx}>{para}</p>
                 ))}
@@ -357,27 +469,37 @@ export function InterpretationResultClient({
 
               {/* 시그널 뱃지 영역 */}
               {((sec.positiveSignals && sec.positiveSignals.length > 0) || (sec.cautionSignals && sec.cautionSignals.length > 0)) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                   {sec.positiveSignals && sec.positiveSignals.length > 0 && (
-                    <div className="bg-emerald-50/50 border border-emerald-100/50 rounded-2xl p-3 text-xs space-y-1">
-                      <span className="font-bold text-emerald-800 flex items-center space-x-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                        <span>긍정 시그널</span>
+                    <div className="bg-gradient-to-br from-emerald-50/30 to-teal-50/20 border border-emerald-100/50 rounded-2xl p-4 space-y-2">
+                      <span className="font-extrabold text-emerald-800 text-[11px] md:text-xs flex items-center space-x-1.5 uppercase tracking-wide">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span>긍정 시그널 / 기회 요소</span>
                       </span>
-                      <ul className="list-disc pl-4 text-emerald-700 space-y-0.5">
-                        {sec.positiveSignals.map((sig, idx) => <li key={idx}>{sig}</li>)}
+                      <ul className="space-y-1.5 text-emerald-700 text-[11px] md:text-xs font-semibold pl-1.5">
+                        {sec.positiveSignals.map((sig, idx) => (
+                          <li key={idx} className="flex items-start space-x-1.5">
+                            <span className="text-emerald-400 font-bold mt-0.5 shrink-0">•</span>
+                            <span>{sig}</span>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   )}
 
                   {sec.cautionSignals && sec.cautionSignals.length > 0 && (
-                    <div className="bg-rose-50/50 border border-rose-100/50 rounded-2xl p-3 text-xs space-y-1">
-                      <span className="font-bold text-rose-800 flex items-center space-x-1">
-                        <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />
-                        <span>주의 필요 기류</span>
+                    <div className="bg-gradient-to-br from-rose-50/30 to-orange-50/20 border border-rose-100/50 rounded-2xl p-4 space-y-2">
+                      <span className="font-extrabold text-rose-800 text-[11px] md:text-xs flex items-center space-x-1.5 uppercase tracking-wide">
+                        <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
+                        <span>주의 필요 기류 / 방어기제</span>
                       </span>
-                      <ul className="list-disc pl-4 text-rose-700 space-y-0.5">
-                        {sec.cautionSignals.map((sig, idx) => <li key={idx}>{sig}</li>)}
+                      <ul className="space-y-1.5 text-rose-700 text-[11px] md:text-xs font-semibold pl-1.5">
+                        {sec.cautionSignals.map((sig, idx) => (
+                          <li key={idx} className="flex items-start space-x-1.5">
+                            <span className="text-rose-400 font-bold mt-0.5 shrink-0">•</span>
+                            <span>{sig}</span>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   )}
@@ -386,16 +508,16 @@ export function InterpretationResultClient({
 
               {/* 구체적 행동 강령 리스트 */}
               {sec.actions && sec.actions.length > 0 && (
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-xs space-y-2">
-                  <span className="font-bold text-slate-700 flex items-center space-x-1">
-                    <ArrowRight className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>실천 행동 제안 (Action Items)</span>
+                <div className="bg-slate-50/80 border border-slate-100/80 rounded-2xl p-4 md:p-5 space-y-2.5">
+                  <span className="font-extrabold text-slate-700 text-[11px] md:text-xs flex items-center space-x-1.5 tracking-wide">
+                    <ArrowRight className="w-4.5 h-4.5 text-indigo-600 shrink-0" />
+                    <span>실천 행동 지침 (Action Items)</span>
                   </span>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-600">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                     {sec.actions.map((act, idx) => (
-                      <div key={idx} className="flex items-center space-x-2 bg-white border border-slate-100 p-2 rounded-xl">
-                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full shrink-0"></span>
-                        <span>{act}</span>
+                      <div key={idx} className="flex items-start space-x-2.5 bg-white border border-slate-100/60 p-3 rounded-xl hover:shadow-xs hover:border-indigo-200/50 transition-all duration-300">
+                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full shrink-0 mt-2"></span>
+                        <span className="text-[11px] md:text-xs font-bold text-slate-700 leading-relaxed">{act}</span>
                       </div>
                     ))}
                   </div>
@@ -411,34 +533,56 @@ export function InterpretationResultClient({
       </div>
 
       {/* 5. 시기 흐름 (Timeline) */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-6">
-        <h3 className="text-xl font-extrabold text-slate-800 flex items-center space-x-2">
+      <div className="bg-gradient-to-b from-white to-slate-50/20 border border-slate-100/80 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+        <h3 className="text-xl font-extrabold text-slate-800 flex items-center space-x-2.5">
           <TrendingUp className="w-5 h-5 text-indigo-600" />
           <span>운세 흐름 및 시기 분석</span>
         </h3>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           {report.timeline.map((item, idx) => (
-            <div key={idx} className="border-l-4 border-indigo-500 pl-4 space-y-2 py-1">
-              <div className="flex items-center justify-between">
-                <span className="font-extrabold text-slate-800 text-base">{item.period}</span>
-                <div className="flex items-center space-x-1">
-                  <span className="text-xs text-slate-400">기운 강도</span>
+            <div key={idx} className="relative pl-6 border-l-2 border-indigo-100 space-y-3 pb-2 last:pb-0">
+              {/* 타임라인 노드 데코레이션 */}
+              <div className="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-indigo-600 ring-4 ring-indigo-50"></div>
+              
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="font-extrabold text-slate-900 text-base md:text-lg">{item.period}</span>
+                <div className="flex items-center space-x-2 bg-indigo-50/30 px-3 py-1 rounded-full border border-indigo-100/30">
+                  <span className="text-[11px] text-slate-500 font-bold">기운 강도</span>
                   <div className="flex space-x-0.5">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <span 
                         key={i} 
-                        className={`w-2 h-2.5 rounded-sm ${i < item.intensity ? 'bg-indigo-600' : 'bg-slate-100'}`}
+                        className={`w-2.5 h-3 rounded-xs transition-all ${
+                          i < item.intensity 
+                            ? 'bg-gradient-to-t from-indigo-700 to-indigo-500 shadow-xs' 
+                            : 'bg-slate-100'
+                        }`}
                       ></span>
                     ))}
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-600 leading-relaxed bg-slate-50/50 p-3 rounded-2xl border border-slate-100/50">
-                <p><strong className="text-slate-800 block mb-0.5">💡 기회 흐름</strong> {item.opportunity}</p>
-                <p><strong className="text-slate-800 block mb-0.5">⚠️ 주의 사항</strong> {item.caution}</p>
-                <p><strong className="text-slate-800 block mb-0.5">🎯 권장 행동</strong> {item.action}</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs text-slate-600 leading-relaxed">
+                <div className="bg-emerald-50/20 border border-emerald-100/30 p-3.5 rounded-2xl space-y-1 hover:shadow-xs transition-all">
+                  <strong className="text-emerald-800 flex items-center space-x-1 font-extrabold mb-1">
+                    <span>💡 기회 흐름</span>
+                  </strong> 
+                  <span className="font-medium text-[11px] md:text-xs leading-relaxed block text-slate-700">{item.opportunity}</span>
+                </div>
+                <div className="bg-rose-50/20 border border-rose-100/30 p-3.5 rounded-2xl space-y-1 hover:shadow-xs transition-all">
+                  <strong className="text-rose-800 flex items-center space-x-1 font-extrabold mb-1">
+                    <span>⚠️ 주의 사항</span>
+                  </strong> 
+                  <span className="font-medium text-[11px] md:text-xs leading-relaxed block text-slate-700">{item.caution}</span>
+                </div>
+                <div className="bg-indigo-50/20 border border-indigo-100/30 p-3.5 rounded-2xl space-y-1 hover:shadow-xs transition-all">
+                  <strong className="text-indigo-800 flex items-center space-x-1 font-extrabold mb-1">
+                    <span>🎯 권장 행동</span>
+                  </strong> 
+                  <span className="font-medium text-[11px] md:text-xs leading-relaxed block text-slate-700">{item.action}</span>
+                </div>
               </div>
             </div>
           ))}
