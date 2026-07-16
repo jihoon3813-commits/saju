@@ -141,8 +141,11 @@ class ConvexUserRepository implements UserRepository {
     return fromConvexDoc("users", res);
   }
   async findByEmail(email: string) {
-    const res = await client.query("crud:getByField", { table: "users", field: "email", value: email });
-    return fromConvexDoc("users", res);
+    const res = await client.query("crud:getByFields", {
+      table: "users",
+      criteria: [{ field: "email", value: email }]
+    });
+    return res[0] ? fromConvexDoc("users", res[0]) : null;
   }
   async findAll() {
     const res = await client.query("crud:findAll", { table: "users" });
