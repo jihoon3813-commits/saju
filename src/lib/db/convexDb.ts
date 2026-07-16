@@ -212,11 +212,17 @@ class ConvexBirthProfileRepository implements BirthProfileRepository {
     return p && p.deletedAt === null ? p : null;
   }
   async findByUserId(userId: string) {
-    const res = await client.query("crud:getByField", { table: "profiles", field: "userId", value: userId });
+    const res = await client.query("crud:getByFields", {
+      table: "profiles",
+      criteria: [{ field: "userId", value: userId }]
+    });
     return res.map((r: any) => fromConvexDoc("profiles", r)).filter((p: any) => p.deletedAt === null);
   }
   async findByAnonymousSessionId(sessionId: string) {
-    const res = await client.query("crud:getByField", { table: "profiles", field: "anonymousSessionId", value: sessionId });
+    const res = await client.query("crud:getByFields", {
+      table: "profiles",
+      criteria: [{ field: "anonymousSessionId", value: sessionId }]
+    });
     return res.map((r: any) => fromConvexDoc("profiles", r)).filter((p: any) => p.deletedAt === null);
   }
   async create(profile: any) {
@@ -359,7 +365,10 @@ class ConvexContentRepository implements ContentRepository {
         ]
       });
     } else {
-      res = await client.query("crud:getByField", { table: "contents", field: "type", value: type });
+      res = await client.query("crud:getByFields", {
+        table: "contents",
+        criteria: [{ field: "type", value: type }]
+      });
     }
     return res.map((r: any) => fromConvexDoc("contents", r)).filter((c: any) => c.deletedAt === null);
   }
@@ -443,7 +452,10 @@ class ConvexAdAuditLogRepository implements AdAuditLogRepository {
     return fromConvexDoc("adAuditLogs", res);
   }
   async findByPlacementId(placementId: string) {
-    const res = await client.query("crud:getByField", { table: "adAuditLogs", field: "placementId", value: placementId });
+    const res = await client.query("crud:getByFields", {
+      table: "adAuditLogs",
+      criteria: [{ field: "placementId", value: placementId }]
+    });
     return res.map((r: any) => fromConvexDoc("adAuditLogs", r));
   }
   async findAll() {
@@ -464,11 +476,17 @@ class ConvexAnalyticsLogRepository implements AnalyticsLogRepository {
     return res.map((r: any) => fromConvexDoc("analyticsLogs", r));
   }
   async findByEventName(eventName: string) {
-    const res = await client.query("crud:getByField", { table: "analyticsLogs", field: "eventName", value: eventName });
+    const res = await client.query("crud:getByFields", {
+      table: "analyticsLogs",
+      criteria: [{ field: "eventName", value: eventName }]
+    });
     return res.map((r: any) => fromConvexDoc("analyticsLogs", r));
   }
   async findBySessionId(sessionId: string) {
-    const res = await client.query("crud:getByField", { table: "analyticsLogs", field: "sessionId", value: sessionId });
+    const res = await client.query("crud:getByFields", {
+      table: "analyticsLogs",
+      criteria: [{ field: "sessionId", value: sessionId }]
+    });
     return res.map((r: any) => fromConvexDoc("analyticsLogs", r));
   }
 }
@@ -505,7 +523,10 @@ class ConvexPriceVersionRepository implements PriceVersionRepository {
     return fromConvexDoc("priceVersions", res);
   }
   async findByProductId(productId: string): Promise<PriceVersion[]> {
-    const res = await client.query("crud:getByField", { table: "priceVersions", field: "productId", value: productId });
+    const res = await client.query("crud:getByFields", {
+      table: "priceVersions",
+      criteria: [{ field: "productId", value: productId }]
+    });
     return res.map((r: any) => fromConvexDoc("priceVersions", r));
   }
   async findLatestByProductId(productId: string): Promise<PriceVersion | null> {
@@ -560,7 +581,10 @@ class ConvexOrderRepository implements OrderRepository {
     return fromConvexDoc("orders", res);
   }
   async findByUserId(userId: string) {
-    const res = await client.query("crud:getByField", { table: "orders", field: "userId", value: userId });
+    const res = await client.query("crud:getByFields", {
+      table: "orders",
+      criteria: [{ field: "userId", value: userId }]
+    });
     return res.map((r: any) => fromConvexDoc("orders", r));
   }
   async findAll() {
@@ -588,7 +612,10 @@ class ConvexCouponUseRepository implements CouponUseRepository {
     return fromConvexDoc("couponUses", res);
   }
   async findByCouponId(couponId: string) {
-    const res = await client.query("crud:getByField", { table: "couponUses", field: "couponId", value: couponId });
+    const res = await client.query("crud:getByFields", {
+      table: "couponUses",
+      criteria: [{ field: "couponId", value: couponId }]
+    });
     return res.map((r: any) => fromConvexDoc("couponUses", r));
   }
   async findByOrderId(orderId: string) {
