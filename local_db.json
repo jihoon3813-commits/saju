@@ -1,0 +1,156 @@
+{
+  "users": [
+    {
+      "id": "2a45b9e5-5998-4c8c-a89b-4ba8f1b5c840",
+      "email": "test_admin_820501@dreamfortune.com",
+      "role": "admin",
+      "createdAt": "2026-07-16T03:05:00.916Z",
+      "updatedAt": "2026-07-16T03:05:00.916Z",
+      "deletedAt": null
+    }
+  ],
+  "sessions": [],
+  "profiles": [],
+  "chart_caches": [],
+  "interpretation_results": [],
+  "shared_links": [],
+  "authors": [],
+  "contents": [],
+  "ad_placements": [],
+  "ad_audit_logs": [],
+  "analytics_logs": [],
+  "products": [
+    {
+      "slug": "family-compatibility",
+      "title": "가족간 다자 명리 궁합",
+      "description": "가족 구성원 3인 이상(부모-자식 등)의 오행 조화 및 관계 조율 지침",
+      "productType": "family_compatibility",
+      "price": 14900,
+      "currency": "KRW",
+      "active": true,
+      "sampleReportId": null,
+      "requiredInputSchema": null,
+      "reportTemplateVersion": "1.0.0",
+      "refundPolicyVersion": "1.0.0",
+      "id": "29ab1ac9-16ea-4980-b9eb-9d219b6ce482",
+      "createdAt": "2026-07-16T03:04:40.256Z",
+      "updatedAt": "2026-07-16T03:04:40.256Z"
+    },
+    {
+      "slug": "child-disposition",
+      "title": "자녀 성향·기질 명리 발달서",
+      "description": "아이의 오행 기질을 기반으로 한 학습 방향 및 심리 양육 가이드",
+      "productType": "child_disposition",
+      "price": 7900,
+      "currency": "KRW",
+      "active": true,
+      "sampleReportId": null,
+      "requiredInputSchema": null,
+      "reportTemplateVersion": "1.0.0",
+      "refundPolicyVersion": "1.0.0",
+      "id": "000d5c0a-560b-4809-af88-966cfe97d88c",
+      "createdAt": "2026-07-16T03:04:40.258Z",
+      "updatedAt": "2026-07-16T03:04:40.258Z"
+    },
+    {
+      "slug": "family-compatibility",
+      "title": "가족간 다자 명리 궁합",
+      "description": "가족 구성원 3인 이상(부모-자식 등)의 오행 조화 및 관계 조율 지침",
+      "productType": "family_compatibility",
+      "price": 14900,
+      "currency": "KRW",
+      "active": true,
+      "sampleReportId": null,
+      "requiredInputSchema": null,
+      "reportTemplateVersion": "1.0.0",
+      "refundPolicyVersion": "1.0.0",
+      "id": "1fa1157b-c813-441f-89c2-4856b2c6234f",
+      "createdAt": "2026-07-16T03:04:40.264Z",
+      "updatedAt": "2026-07-16T03:04:40.264Z"
+    }
+  ],
+  "price_versions": [
+    {
+      "productId": "29ab1ac9-16ea-4980-b9eb-9d219b6ce482",
+      "price": 14900,
+      "currency": "KRW",
+      "version": "1.0.0",
+      "active": true,
+      "id": "54e1eacd-eaa5-4e68-bfd1-58a1007619d3",
+      "createdAt": "2026-07-16T03:04:40.260Z"
+    },
+    {
+      "productId": "000d5c0a-560b-4809-af88-966cfe97d88c",
+      "price": 7900,
+      "currency": "KRW",
+      "version": "1.0.0",
+      "active": true,
+      "id": "4d7633de-749c-4693-b89d-0d24b0436fee",
+      "createdAt": "2026-07-16T03:04:40.262Z"
+    },
+    {
+      "productId": "1fa1157b-c813-441f-89c2-4856b2c6234f",
+      "price": 14900,
+      "currency": "KRW",
+      "version": "1.0.0",
+      "active": true,
+      "id": "edca2bf2-9d77-4e26-90a1-6bd6a4e2ddba",
+      "createdAt": "2026-07-16T03:04:40.268Z"
+    }
+  ],
+  "coupons": [],
+  "orders": [],
+  "coupon_uses": [],
+  "webhook_logs": [],
+  "user_reports": [
+    {
+      "reportType": "payment",
+      "orderId": null,
+      "errorCode": "500",
+      "versionInfo": "engine=1.0.0",
+      "content": "카드번호 [CARD_MASKED] 결제가 안되고 오류코드 500이 뜹니다. 제 번호는 [PHONE_MASKED] 입니다.",
+      "id": "aa2347b5-9836-40a1-a98a-b97e8684bac6",
+      "status": "pending",
+      "createdAt": "2026-07-16T03:05:00.924Z",
+      "resolvedAt": null
+    }
+  ],
+  "audit_logs": [
+    {
+      "adminId": "2a45b9e5-5998-4c8c-a89b-4ba8f1b5c840",
+      "adminEmail": "test_admin_820501@dreamfortune.com",
+      "action": "관리자 MFA OTP 가상 인증 완료",
+      "ipAddress": "127.0.0.1",
+      "userAgent": "Vitest Runner",
+      "id": "9d659bfc-b750-4947-a9ce-a220323827e9",
+      "createdAt": "2026-07-16T03:05:00.920Z"
+    }
+  ],
+  "policy_versions": [
+    {
+      "title": "개인정보 처리방침",
+      "version": "1.0.0",
+      "content": "개인 생년월일시 데이터 수집 및 안전한 마스킹, 권한 삭제 요청 처리 절차를 명시합니다...",
+      "active": true,
+      "id": "1ce1776f-cb48-45a8-8ad6-e79d90f8b5ef",
+      "createdAt": "2026-07-16T03:04:40.267Z"
+    },
+    {
+      "title": "쿠키 동의 정책",
+      "version": "1.0.0",
+      "content": "사용자의 브라우저 쿠키 승인 상태에 따른 광고 서빙 및 추적 제어 방침을 명시합니다...",
+      "active": true,
+      "id": "12d34293-d2b5-49a0-80d6-db83d7fa6935",
+      "createdAt": "2026-07-16T03:04:40.272Z"
+    },
+    {
+      "title": "서비스 이용약관",
+      "version": "1.0.0",
+      "content": "본 서비스의 이용 권한 및 결제, 환불 규칙을 명시합니다...",
+      "active": true,
+      "id": "6a7db65d-45de-497a-a3dc-c9a393edcaff",
+      "createdAt": "2026-07-16T03:04:40.274Z"
+    }
+  ],
+  "migration_history": []
+}

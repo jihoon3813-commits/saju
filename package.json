@@ -1,0 +1,35 @@
+{
+  "name": "dream-and-fortune",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run --fileParallelism=false"
+  },
+  "dependencies": {
+    "@types/pdfkit": "^0.17.6",
+    "lucide-react": "^0.446.0",
+    "lunar-javascript": "^1.6.12",
+    "next": "16.2.10",
+    "pdfkit": "^0.19.1",
+    "pg": "^8.11.5",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/pg": "^8.11.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^1.6.0"
+  }
+}
