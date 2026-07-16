@@ -437,31 +437,78 @@ export function InterpretationResultClient({
         <div className="pt-2">
           
           {activeTab === "pyungsaeng" && (
-            <div className="space-y-6 animate-fade-in">
-              <div className="border-b border-slate-100 pb-2">
-                <h3 className="text-lg font-black text-slate-800 font-serif">평생 사주 종합 해설</h3>
-                <p className="text-xs text-slate-400 mt-1">타고난 평생의 격국과 육친, 환경 기운에 따른 인생 종합 로드맵</p>
-              </div>
+            <div className="space-y-8 animate-fade-in">
+              {/* 1. 실시간 AI API 분석 결과 영역 */}
+              {report && report.sections && report.sections.length > 0 && (
+                <div className="space-y-4">
+                  <div className="border-b border-indigo-100 pb-2">
+                    <span className="text-[10px] bg-indigo-600 text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">AI Real-time Analysis</span>
+                    <h3 className="text-base font-black text-slate-900 mt-1 font-serif">AI 실시간 명리학 종합 분석</h3>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4">
+                    {report.sections.map((sect, sIdx) => (
+                      <div key={sIdx} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs space-y-3">
+                        <h4 className="font-extrabold text-sm text-indigo-900 flex items-center space-x-1.5">
+                          <Sparkles className="w-4 h-4 text-amber-500 animate-pulse" />
+                          <span>{sect.title}</span>
+                        </h4>
+                        
+                        {sect.summary && (
+                          <p className="text-xs font-black text-slate-800 border-l-2 border-indigo-500 pl-2 mt-1 italic leading-relaxed">
+                            “{sect.summary}”
+                          </p>
+                        )}
 
-              {[
-                { title: "초년운 (29세 이전)", content: sajuPreset.earlyLife, bg: "from-blue-50/20 to-sky-50/10 border-blue-100/60" },
-                { title: "중년운 (30세 ~ 59세)", content: sajuPreset.midLife, bg: "from-indigo-50/20 to-purple-50/10 border-indigo-100/60" },
-                { title: "말년운 (60세 이후)", content: sajuPreset.lateLife, bg: "from-amber-50/20 to-amber-100/5 border-amber-200/50" },
-                { title: "형제운", content: sajuPreset.brother, bg: "from-emerald-50/20 to-teal-50/10 border-emerald-100/60" },
-                { title: "자식운", content: sajuPreset.child, bg: "from-rose-50/20 to-orange-50/10 border-rose-100/60" },
-                { title: "부부운", content: sajuPreset.couple, bg: "from-fuchsia-50/20 to-pink-50/10 border-fuchsia-100/60" },
-                { title: "직업운 & 적성", content: sajuPreset.job, bg: "from-slate-50/30 to-zinc-50/10 border-slate-200/60" }
-              ].map((sect, sIdx) => (
-                <div key={sIdx} className={`p-5 rounded-2xl border bg-gradient-to-br ${sect.bg} space-y-2`}>
-                  <h4 className="font-extrabold text-sm text-slate-800 flex items-center space-x-1.5">
-                    <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
-                    <span>{sect.title}</span>
-                  </h4>
-                  <p className="text-xs md:text-sm text-slate-700 leading-relaxed font-medium">
-                    {sect.content}
-                  </p>
+                        <div className="space-y-2 text-xs md:text-sm text-slate-650 leading-relaxed font-medium font-sans">
+                          {sect.paragraphs.map((p, pIdx) => (
+                            <p key={pIdx} className="whitespace-pre-wrap">{p}</p>
+                          ))}
+                        </div>
+
+                        {/* 시그널 보조 정보 */}
+                        {(sect.positiveSignals && sect.positiveSignals.length > 0) && (
+                          <div className="flex flex-wrap gap-1.5 pt-1.5">
+                            {sect.positiveSignals.map((sig, sigIdx) => (
+                              <span key={sigIdx} className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 rounded-md text-[10px] text-emerald-800 font-bold">
+                                👍 {sig}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
+
+              {/* 2. 일간 성정 기반 친근한 스토리텔링 보완 풀이 */}
+              <div className="space-y-6">
+                <div className="border-b border-slate-100 pb-2">
+                  <span className="text-[10px] bg-amber-500 text-slate-900 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Storytelling Guide</span>
+                  <h3 className="text-base font-black text-slate-800 mt-1 font-serif">쉽게 읽는 {sajuPreset.name} 성정 해설</h3>
+                  <p className="text-xs text-slate-400 mt-1">타고난 평생의 격국과 육친, 환경 기운에 따른 인생 종합 로드맵</p>
+                </div>
+
+                {[
+                  { title: `초년운 - ${sajuPreset.name}의 청년기`, content: sajuPreset.earlyLife, bg: "from-blue-50/20 to-sky-50/10 border-blue-100/60" },
+                  { title: `중년운 - ${sajuPreset.name}의 장년기`, content: sajuPreset.midLife, bg: "from-indigo-50/20 to-purple-50/10 border-indigo-100/60" },
+                  { title: `말년운 - ${sajuPreset.name}의 노년기`, content: sajuPreset.lateLife, bg: "from-amber-50/20 to-amber-100/5 border-amber-200/50" },
+                  { title: "형제운 & 인덕", content: sajuPreset.brother, bg: "from-emerald-50/20 to-teal-50/10 border-emerald-100/60" },
+                  { title: "자식운 & 가문", content: sajuPreset.child, bg: "from-rose-50/20 to-orange-50/10 border-rose-100/60" },
+                  { title: "부부운 & 가인", content: sajuPreset.couple, bg: "from-fuchsia-50/20 to-pink-50/10 border-fuchsia-100/60" },
+                  { title: "직업운 & 적성 처방", content: sajuPreset.job, bg: "from-slate-50/30 to-zinc-50/10 border-slate-200/60" }
+                ].map((sect, sIdx) => (
+                  <div key={sIdx} className={`p-5 rounded-2xl border bg-gradient-to-br ${sect.bg} space-y-2`}>
+                    <h4 className="font-extrabold text-sm text-slate-800 flex items-center space-x-1.5">
+                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                      <span>{sect.title}</span>
+                    </h4>
+                    <p className="text-xs md:text-sm text-slate-700 leading-relaxed font-medium">
+                      {sect.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
