@@ -43,10 +43,13 @@ export const Header: React.FC = () => {
           <div className="flex items-center space-x-8">
             <Link
               href="/"
-              className="font-serif text-lg sm:text-xl font-bold tracking-tight text-navy flex items-center space-x-1.5 focus:outline-none rounded px-1"
+              className="focus:outline-none rounded px-1 flex items-center justify-center"
             >
-              <Globe className="w-5 h-5 text-gold" />
-              <span>꿈과 운의 사전</span>
+              <img 
+                src="https://res.cloudinary.com/dfkntvpmv/image/upload/v1784171074/Image_2_csmzku.png" 
+                alt="꿈과 운의 사전" 
+                className="h-8 w-auto object-contain"
+              />
             </Link>
 
             {/* 2. PC 네비게이션 링크 */}

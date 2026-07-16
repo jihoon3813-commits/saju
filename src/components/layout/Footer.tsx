@@ -45,8 +45,12 @@ export const Footer: React.FC = () => {
         {/* 상단 사이트 맵 링크 그룹 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1 space-y-4">
-            <Link href="/" className="font-serif text-lg font-bold text-cream tracking-tight block">
-              꿈과 운의 사전
+            <Link href="/" className="block">
+              <img 
+                src="https://res.cloudinary.com/dfkntvpmv/image/upload/v1784171074/Image_2_csmzku.png" 
+                alt="꿈과 운의 사전" 
+                className="h-8 w-auto object-contain brightness-0 invert" 
+              />
             </Link>
             <p className="text-xs text-cream/50 leading-relaxed max-w-[200px]">
               수천 년 쌓인 명리학 공식과 최신 인공지능 해설을 융합한 동양 철학 프리미엄 매거진.

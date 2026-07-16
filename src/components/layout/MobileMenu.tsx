@@ -51,8 +51,12 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
       <div className="relative w-full max-w-[320px] h-full bg-surface shadow-2xl border-l border-brand-border/60 flex flex-col z-10 animate-in slide-in-from-right duration-300">
         {/* 헤더 */}
         <div className="flex items-center justify-between px-5 py-4.5 border-b border-brand-border">
-          <Link href="/" onClick={onClose} className="font-serif text-lg font-bold text-navy tracking-tight">
-            꿈과 운의 사전
+          <Link href="/" onClick={onClose} className="flex items-center justify-center">
+            <img 
+              src="https://res.cloudinary.com/dfkntvpmv/image/upload/v1784171074/Image_2_csmzku.png" 
+              alt="꿈과 운의 사전" 
+              className="h-7 w-auto object-contain"
+            />
           </Link>
           <button
             onClick={onClose}
