@@ -112,8 +112,18 @@ export function InterpretationResultClient({
   const [copied, setCopied] = useState(false);
   const [showEvidence, setShowEvidence] = useState(false);
 
-  // 서브 메뉴 탭 상태 추가
+  // 서브 메뉴 탭 상태 추가 및 URL 쿼리 연동
   const [activeTab, setActiveTab] = useState<"pyungsaeng" | "tojung" | "monthly" | "today" | "manse">("pyungsaeng");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const tabParam = searchParams.get("tab");
+      if (tabParam && ["pyungsaeng", "tojung", "monthly", "today", "manse"].includes(tabParam)) {
+        setActiveTab(tabParam as any);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (isSharedView && prefetchedData) {

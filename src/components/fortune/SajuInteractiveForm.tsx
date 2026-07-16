@@ -130,8 +130,10 @@ export default function SajuInteractiveForm() {
       topicPriority: ["종합"]
     };
 
+    const searchParams = new URLSearchParams(window.location.search);
+    const tab = searchParams.get("tab") || "pyungsaeng";
     localStorage.setItem("fortune_input_draft", JSON.stringify(draftData));
-    router.push("/fortune/input?autoRestore=true");
+    router.push(`/fortune/input?autoRestore=true&tab=${tab}`);
   };
 
   const dist = chart?.elementsDistribution || { wood: 0, fire: 0, earth: 0, metal: 0, water: 0 };

@@ -243,8 +243,10 @@ export default function FortuneInputWizard({ existingProfiles = [] }: FortuneInp
       setStep((s) => s + 1);
     } else {
       // 4단계 완료 시, 로컬 스토리지에 최종 드래프트를 보관하고 최종 검토 페이지(/fortune/input/review)로 포워딩
+      const searchParams = new URLSearchParams(window.location.search);
+      const tab = searchParams.get("tab") || "pyungsaeng";
       saveDraft(formData);
-      router.push("/fortune/input/review");
+      router.push(`/fortune/input/review?tab=${tab}`);
     }
   };
 

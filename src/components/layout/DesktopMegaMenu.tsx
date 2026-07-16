@@ -36,17 +36,17 @@ export const DesktopMegaMenu: React.FC<DesktopMegaMenuProps> = ({
         {
           title: "개인 사주분석",
           links: [
-            { label: "무료 만세력 조회", href: "/saju", desc: "나의 여덟 글자와 오행 분포" },
-            { label: "평생 사주 종합", href: "/saju", desc: "타고난 격국과 오행 비율" },
-            { label: "10대 대운 흐름", href: "/saju", desc: "인생의 큰 전환기 타이밍" },
+            { label: "무료 만세력 조회", href: "/saju?tab=manse", desc: "나의 여덟 글자와 오행 분포" },
+            { label: "평생 사주 종합", href: "/saju?tab=pyungsaeng", desc: "타고난 격국과 오행 비율" },
+            { label: "10대 대운 흐름", href: "/saju?tab=pyungsaeng", desc: "인생의 큰 전환기 타이밍" },
           ],
         },
         {
           title: "시기별 신수",
           links: [
-            { label: "신년 신수 비결", href: "/today", desc: "올해 일어날 주요 사건 예견" },
-            { label: "월간 종합 운세", href: "/today", desc: "달마다 변화하는 길흉화복" },
-            { label: "오늘의 일진 상세", href: "/today", desc: "가장 알맞은 행동 지침" },
+            { label: "신년 신수 비결", href: "/saju?tab=tojung", desc: "올해 일어날 주요 사건 예견" },
+            { label: "월간 종합 운세", href: "/saju?tab=monthly", desc: "달마다 변화하는 길흉화복" },
+            { label: "오늘의 일진 상세", href: "/saju?tab=today", desc: "가장 알맞은 행동 지침" },
           ],
         },
       ],

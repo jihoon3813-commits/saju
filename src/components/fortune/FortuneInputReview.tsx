@@ -423,7 +423,9 @@ export default function FortuneInputReview() {
               variant="primary" 
               onClick={() => {
                 if (finalDto?.profileId) {
-                  router.push(`/result/basic-saju/${finalDto.profileId}`);
+                  const searchParams = new URLSearchParams(window.location.search);
+                  const tab = searchParams.get("tab") || "pyungsaeng";
+                  router.push(`/result/basic-saju/${finalDto.profileId}?tab=${tab}`);
                 } else {
                   router.push("/fortune/input");
                 }
