@@ -1,10 +1,16 @@
 import { DbContext } from "./types";
 import { jsonDb } from "./jsonDb";
 import { postgresDb } from "./postgresDb";
+import { convexDb } from "./convexDb";
 
-// DATABASE_TYPE 환경변수가 'postgres'이면 postgresDb를 사용하고, 그렇지 않으면 jsonDb(로컬 JSON 파일 저장소)를 기본값으로 사용합니다.
+// DATABASE_TYPE 환경변수에 따라 적합한 DB 어댑터를 선택해 노출합니다. (json, postgres, convex)
 const dbType = process.env.DATABASE_TYPE || "json";
 
-export const db: DbContext = dbType === "postgres" ? postgresDb : jsonDb;
+export const db: DbContext = 
+  dbType === "convex" 
+    ? convexDb 
+    : dbType === "postgres" 
+    ? postgresDb 
+    : jsonDb;
 
 export * from "./types";
