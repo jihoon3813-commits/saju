@@ -6,6 +6,17 @@ import { Calendar, Info, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { calculateManseChart, STEM_ELEMENTS, BRANCH_ELEMENTS } from "@/lib/manse/fourPillarsCalculator";
 import { ChartResult } from "@/lib/manse/types";
+import { handleCreateProfile } from "@/app/actions/profile";
+
+// 각 운세 하위 메뉴별 동적 메타 데이터 정의
+const TYPE_METAS: Record<string, { title: string; desc: string; buttonText: string }> = {
+  manse: { title: "무료 만세력 조회", desc: "나의 여덟 글자와 오행 분포 비율을 산출합니다.", buttonText: "만세력 조회하기" },
+  pyungsaeng: { title: "평생 사주 종합", desc: "타고난 평생 격국과 가문, 직업의 종합 인생 로드맵을 도출합니다.", buttonText: "평생사주 분석하기" },
+  daewun: { title: "10대 대운 흐름", desc: "일생을 지배하는 10년 단위 대세운의 거대한 파동 타이밍을 읽습니다.", buttonText: "대운흐름 분석하기" },
+  tojung: { title: "신년 신수 비결", desc: "병오(丙午)년 한 해의 수려한 12개월 세운 비결서를 제작합니다.", buttonText: "신수비결 분석하기" },
+  monthly: { title: "월간 종합 운세", desc: "달마다 변하는 길흉 기류와 31일 일자별 신살 및 운세 캘린더를 발행합니다.", buttonText: "월간운세 분석하기" },
+  today: { title: "오늘의 일진 상세", desc: "오늘 하루 나를 이끄는 핵심 바이오리듬과 시간대별 행동 지침을 발행합니다.", buttonText: "오늘일진 분석하기" }
+};
 
 // 오행 한글 명칭 및 색상 테마 매핑
 const ELEMENT_STYLES: Record<string, { bg: string; border: string; text: string; nameKo: string; progressColor: string }> = {
@@ -32,8 +43,26 @@ const TIME_OPTIONS = [
   { value: "22:00", label: "亥시 (21:30 ~ 23:29)" }
 ];
 
+// 연도 범위 생성 (1930년 ~ 2026년)
+const YEAR_OPTIONS = Array.from({ length: 2026 - 1930 + 1 }, (_, i) => 2026 - i);
+// 월 범위 생성
+const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
+// 일 범위 생성
+const DAY_OPTIONS = Array.from({ length: 31 }, (_, i) => i + 1);
+
 export default function SajuInteractiveForm() {
   const router = useRouter();
+  const [serviceType, setServiceType] = useState<string>("pyungsaeng");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const t = searchParams.get("type") || "pyungsaeng";
+      setServiceType(t);
+    }
+  }, []);
 
   // 1. 입력 폼 상태 (기본값: 이미지와 동일하게 1995년 10월 24일 세팅)
   const [inputs, setInputs] = useState({
@@ -42,7 +71,7 @@ export default function SajuInteractiveForm() {
     day: 24,
     birthTime: "none",
     calendarType: "solar" as "solar" | "lunar",
-    gender: "male" as "male" | "female" | "unspecified"
+    gender: "male" as "male" | "female"
   });
 
   const [chart, setChart] = useState<ChartResult | null>(null);
@@ -102,38 +131,53 @@ export default function SajuInteractiveForm() {
     return `현재 명식에는 **${labelsKo[weakest]}** 기운이 부족하고 **${labelsKo[strongest]}** 기운이 가장 강하게 관측됩니다. 부족한 에너지를 조율하기 위해 ${remedyKo[weakest]}`;
   };
 
-  // 4. 정식 위저드로 가입 연동 이관
-  const handleSubmit = (e: React.FormEvent) => {
+  // 4. 간소화된 다이렉트 분석 프로필 제출 및 결과 즉시 이동
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setErrorMsg(null);
 
-    const formattedMonth = String(inputs.month).padStart(2, "0");
-    const formattedDay = String(inputs.day).padStart(2, "0");
-    const birthDateStr = `${inputs.year}-${formattedMonth}-${formattedDay}`;
+    try {
+      const formattedMonth = String(inputs.month).padStart(2, "0");
+      const formattedDay = String(inputs.day).padStart(2, "0");
+      const birthDateStr = `${inputs.year}-${formattedMonth}-${formattedDay}`;
 
-    const draftData = {
-      profileId: "",
-      alias: "분석회원",
-      genderRuleOption: inputs.gender,
-      calendarType: inputs.calendarType,
-      lunarLeapMonth: false,
-      birthDate: birthDateStr,
-      birthTime: inputs.birthTime === "none" ? "12:00" : inputs.birthTime,
-      unknownBirthTime: inputs.birthTime === "none",
-      birthCountry: "대한민국",
-      birthCity: "서울",
-      selectedCityIndex: "0",
-      timezone: "Asia/Seoul",
-      latitude: 37.5665,
-      longitude: 126.9780,
-      useTrueSolarTime: false,
-      borderTimeRule: "23",
-      topicPriority: ["종합"]
-    };
+      const profilePayload = {
+        alias: "사주 분석 대상자",
+        relationship: "self" as const,
+        genderRuleOption: inputs.gender,
+        calendarType: inputs.calendarType,
+        lunarLeapMonth: false,
+        birthDate: birthDateStr,
+        birthTime: inputs.birthTime === "none" ? "12:00" : inputs.birthTime,
+        unknownBirthTime: inputs.birthTime === "none",
+        birthCountry: "대한민국",
+        birthCity: "서울",
+        selectedCityIndex: "0",
+        timezone: "Asia/Seoul",
+        latitude: 37.5665,
+        longitude: 126.9780,
+        calculationPreference: {
+          useTrueSolarTime: false,
+          borderTimeRule: "23" as const
+        },
+        saveConsent: true,
+        topicPriority: ["종합"]
+      };
 
-    const searchParams = new URLSearchParams(window.location.search);
-    const tab = searchParams.get("tab") || "pyungsaeng";
-    localStorage.setItem("fortune_input_draft", JSON.stringify(draftData));
-    router.push(`/fortune/input?autoRestore=true&tab=${tab}`);
+      const dbResult = await handleCreateProfile(profilePayload);
+      if (dbResult.success && dbResult.profile) {
+        // 성공 시 즉각 4단계 건너뛰고 결과 뷰로 리다이렉트!
+        router.push(`/result/basic-saju/${dbResult.profile.id}?type=${serviceType}`);
+      } else {
+        setErrorMsg(dbResult.error || "분석 대상 정보 등록 중 오류가 발생했습니다.");
+        setIsSubmitting(false);
+      }
+    } catch (err: any) {
+      console.error("제출 프로세스 실패:", err);
+      setErrorMsg(err.message || "서버 통신 중 장애가 일어났습니다.");
+      setIsSubmitting(false);
+    }
   };
 
   const dist = chart?.elementsDistribution || { wood: 0, fire: 0, earth: 0, metal: 0, water: 0 };
@@ -182,45 +226,85 @@ export default function SajuInteractiveForm() {
       
       {/* 1. 입력부 (5열) */}
       <div className="lg:col-span-5 bg-surface border border-brand-border rounded-2xl p-6 shadow-xs space-y-5">
-        <h2 className="text-lg font-bold text-navy border-b border-brand-border/60 pb-2">
-          사주 분석 정보 입력
-        </h2>
+        <div className="border-b border-brand-border/60 pb-3 space-y-1">
+          <h2 className="text-lg font-bold text-navy">
+            {TYPE_METAS[serviceType]?.title || "사주 분석 정보 입력"}
+          </h2>
+          <p className="text-xxs text-navy/60 leading-relaxed font-semibold">
+            {TYPE_METAS[serviceType]?.desc || "태어난 생년월일시를 절기 기준으로 환산하여 해석을 제공합니다."}
+          </p>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           
-          {/* 날짜 */}
+          {/* 성별 선택 드롭다운 */}
+          <div>
+            <label className="text-xxs font-bold text-navy/55 block mb-1">성별</label>
+            <select
+              value={inputs.gender}
+              onChange={(e) => setInputs((prev) => ({ ...prev, gender: e.target.value as "male" | "female" }))}
+              className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold min-h-[44px]"
+            >
+              <option value="male">남자</option>
+              <option value="female">여자</option>
+            </select>
+          </div>
+
+          {/* 달력 양음력 선택 드롭다운 */}
+          <div>
+            <label className="text-xxs font-bold text-navy/55 block mb-1">달력 유형</label>
+            <select
+              value={inputs.calendarType}
+              onChange={(e) => setInputs((prev) => ({ ...prev, calendarType: e.target.value as "solar" | "lunar" }))}
+              className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold min-h-[44px]"
+            >
+              <option value="solar">양력</option>
+              <option value="lunar">음력</option>
+            </select>
+          </div>
+
+          {/* 년, 월, 일 드롭다운 레이아웃 */}
           <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="text-xxs font-bold text-navy/55">생년</label>
-              <input
-                type="number"
+              <label className="text-xxs font-bold text-navy/55 block mb-1">년도</label>
+              <select
                 value={inputs.year}
                 onChange={(e) => setInputs((prev) => ({ ...prev, year: parseInt(e.target.value) || 1995 }))}
-                className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold"
-              />
+                className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold min-h-[44px]"
+              >
+                {YEAR_OPTIONS.map((y) => (
+                  <option key={y} value={y}>{y}년</option>
+                ))}
+              </select>
             </div>
             <div>
-              <label className="text-xxs font-bold text-navy/55">생월</label>
-              <input
-                type="number"
+              <label className="text-xxs font-bold text-navy/55 block mb-1">월</label>
+              <select
                 value={inputs.month}
-                onChange={(e) => setInputs((prev) => ({ ...prev, month: Math.min(12, Math.max(1, parseInt(e.target.value) || 1)) }))}
-                className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold"
-              />
+                onChange={(e) => setInputs((prev) => ({ ...prev, month: parseInt(e.target.value) || 10 }))}
+                className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold min-h-[44px]"
+              >
+                {MONTH_OPTIONS.map((m) => (
+                  <option key={m} value={m}>{m}월</option>
+                ))}
+              </select>
             </div>
             <div>
-              <label className="text-xxs font-bold text-navy/55">생일</label>
-              <input
-                type="number"
+              <label className="text-xxs font-bold text-navy/55 block mb-1">일</label>
+              <select
                 value={inputs.day}
-                onChange={(e) => setInputs((prev) => ({ ...prev, day: Math.min(31, Math.max(1, parseInt(e.target.value) || 1)) }))}
-                className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold"
-              />
+                onChange={(e) => setInputs((prev) => ({ ...prev, day: parseInt(e.target.value) || 24 }))}
+                className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold min-h-[44px]"
+              >
+                {DAY_OPTIONS.map((d) => (
+                  <option key={d} value={d}>{d}일</option>
+                ))}
+              </select>
             </div>
           </div>
 
-          {/* 시간 */}
+          {/* 태어난 시간 드롭다운 */}
           <div>
-            <label className="text-xxs font-bold text-navy/55 block mb-1">출생시각</label>
+            <label className="text-xxs font-bold text-navy/55 block mb-1">태어난 시간</label>
             <select
               value={inputs.birthTime}
               onChange={(e) => setInputs((prev) => ({ ...prev, birthTime: e.target.value }))}
@@ -234,66 +318,21 @@ export default function SajuInteractiveForm() {
             </select>
           </div>
 
-          {/* 달력 */}
-          <div className="space-y-1">
-            <span className="text-xxs font-bold text-navy/55 block">력 기준</span>
-            <div className="flex space-x-2">
-              <button
-                type="button"
-                onClick={() => setInputs((prev) => ({ ...prev, calendarType: "solar" }))}
-                className={`flex-1 text-center py-2 text-xs rounded-lg cursor-pointer font-bold border transition ${
-                  inputs.calendarType === "solar"
-                    ? "border-gold bg-gold/5 text-gold"
-                    : "border-brand-border text-navy/60 hover:bg-cream/20"
-                }`}
-              >
-                양력
-              </button>
-              <button
-                type="button"
-                onClick={() => setInputs((prev) => ({ ...prev, calendarType: "lunar" }))}
-                className={`flex-1 text-center py-2 text-xs rounded-lg cursor-pointer font-bold border transition ${
-                  inputs.calendarType === "lunar"
-                    ? "border-gold bg-gold/5 text-gold"
-                    : "border-brand-border text-navy/60 hover:bg-cream/20"
-                }`}
-              >
-                음력 평달
-              </button>
-            </div>
-          </div>
+          {errorMsg && (
+            <p className="text-xxs font-bold text-red-500 bg-red-50 border border-red-150 p-2.5 rounded-lg">
+              ⚠️ {errorMsg}
+            </p>
+          )}
 
-          {/* 성별 */}
-          <div className="space-y-1">
-            <span className="text-xxs font-bold text-navy/55 block">성별</span>
-            <div className="flex space-x-2">
-              <button
-                type="button"
-                onClick={() => setInputs((prev) => ({ ...prev, gender: "male" }))}
-                className={`flex-1 text-center py-2 text-xs rounded-lg cursor-pointer font-bold border transition ${
-                  inputs.gender === "male"
-                    ? "border-gold bg-gold/5 text-gold"
-                    : "border-brand-border text-navy/60 hover:bg-cream/20"
-                }`}
-              >
-                남성
-              </button>
-              <button
-                type="button"
-                onClick={() => setInputs((prev) => ({ ...prev, gender: "female" }))}
-                className={`flex-1 text-center py-2 text-xs rounded-lg cursor-pointer font-bold border transition ${
-                  inputs.gender === "female"
-                    ? "border-gold bg-gold/5 text-gold"
-                    : "border-brand-border text-navy/60 hover:bg-cream/20"
-                }`}
-              >
-                여성
-              </button>
-            </div>
-          </div>
-
-          <Button type="submit" variant="primary" fullWidth className="font-bold min-h-[44px]">
-            만세력 사주팔자 분석
+          <Button type="submit" variant="primary" fullWidth disabled={isSubmitting} className="font-bold min-h-[44px]">
+            {isSubmitting ? (
+              <span className="flex items-center justify-center space-x-2">
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>정교한 사주 분석 분석중...</span>
+              </span>
+            ) : (
+              TYPE_METAS[serviceType]?.buttonText || "운세보기"
+            )}
           </Button>
         </form>
       </div>

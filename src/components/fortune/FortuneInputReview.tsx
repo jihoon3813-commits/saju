@@ -73,7 +73,15 @@ export default function FortuneInputReview() {
         <p className="text-xs text-navy/60 leading-relaxed">
           운세 분석을 시작하려면 생년월일시 정보를 먼저 기입해 주셔야 합니다.
         </p>
-        <Button variant="primary" onClick={() => router.push("/fortune/input")} className="w-full">
+        <Button 
+          variant="primary" 
+          onClick={() => {
+            const searchParams = new URLSearchParams(window.location.search);
+            const type = searchParams.get("type") || "pyungsaeng";
+            router.push(`/fortune/input?type=${type}`);
+          }} 
+          className="w-full"
+        >
           입력 페이지로 이동
         </Button>
       </div>
@@ -187,7 +195,11 @@ export default function FortuneInputReview() {
               <Button 
                 variant="secondary" 
                 size="sm"
-                onClick={() => router.push("/fortune/input")}
+                onClick={() => {
+                  const searchParams = new URLSearchParams(window.location.search);
+                  const type = searchParams.get("type") || "pyungsaeng";
+                  router.push(`/fortune/input?type=${type}`);
+                }}
                 className="flex items-center space-x-1 text-xxs font-bold"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
@@ -332,7 +344,11 @@ export default function FortuneInputReview() {
           <div className="flex justify-between items-center">
             <Button 
               variant="secondary" 
-              onClick={() => router.push("/fortune/input")}
+              onClick={() => {
+                const searchParams = new URLSearchParams(window.location.search);
+                const type = searchParams.get("type") || "pyungsaeng";
+                router.push(`/fortune/input?type=${type}`);
+              }}
               disabled={submitting}
               className="min-h-[44px] px-6"
             >
@@ -424,8 +440,8 @@ export default function FortuneInputReview() {
               onClick={() => {
                 if (finalDto?.profileId) {
                   const searchParams = new URLSearchParams(window.location.search);
-                  const tab = searchParams.get("tab") || "pyungsaeng";
-                  router.push(`/result/basic-saju/${finalDto.profileId}?tab=${tab}`);
+                  const type = searchParams.get("type") || "pyungsaeng";
+                  router.push(`/result/basic-saju/${finalDto.profileId}?type=${type}`);
                 } else {
                   router.push("/fortune/input");
                 }

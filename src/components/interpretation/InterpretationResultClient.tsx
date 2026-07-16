@@ -112,15 +112,15 @@ export function InterpretationResultClient({
   const [copied, setCopied] = useState(false);
   const [showEvidence, setShowEvidence] = useState(false);
 
-  // 서브 메뉴 탭 상태 추가 및 URL 쿼리 연동
-  const [activeTab, setActiveTab] = useState<"pyungsaeng" | "tojung" | "monthly" | "today" | "manse">("pyungsaeng");
+  // URL에서 전달된 6가지 하위 메뉴 타입 상태 연동
+  const [urlType, setUrlType] = useState<"pyungsaeng" | "daewun" | "tojung" | "monthly" | "today" | "manse">("pyungsaeng");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const searchParams = new URLSearchParams(window.location.search);
-      const tabParam = searchParams.get("tab");
-      if (tabParam && ["pyungsaeng", "tojung", "monthly", "today", "manse"].includes(tabParam)) {
-        setActiveTab(tabParam as any);
+      const typeParam = searchParams.get("type");
+      if (typeParam && ["pyungsaeng", "daewun", "tojung", "monthly", "today", "manse"].includes(typeParam)) {
+        setUrlType(typeParam as any);
       }
     }
   }, []);
@@ -270,27 +270,40 @@ export function InterpretationResultClient({
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8 animate-fade-in font-sans">
       
       {/* 1. 상단 제목 헤더 */}
-      <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 text-white rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden border border-slate-800">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
-        <div className="relative space-y-4">
-          <div className="flex items-center space-x-2">
-            <span className="px-3 py-1 text-[10px] bg-indigo-500/20 border border-indigo-400/20 rounded-full text-indigo-300 font-bold uppercase tracking-wider">
-              {serviceType === "basic-saju" ? "정통 사주 평생분석" : serviceType === "today" ? "오늘의 일진" : "기본 궁합"}
-            </span>
-            <span className="px-2 py-0.5 text-[10px] bg-emerald-500/20 border border-emerald-400/20 rounded text-emerald-300 font-bold">
-              안전 검증 완료
-            </span>
+      {(() => {
+        const metas: Record<string, { serviceName: string; title: string }> = {
+          manse: { serviceName: "무료 만세력 조회", title: "나의 여덟 글자 및 오행 기운 명식표" },
+          pyungsaeng: { serviceName: "평생 사주 종합 분석", title: "타고난 평생 격국과 종합 인생 로드맵" },
+          daewun: { serviceName: "10대 대운 흐름 분석", title: "10년 단위 대세운 흐름 및 터닝포인트 조언" },
+          tojung: { serviceName: "2026 신토정비결", title: "병오(丙午)년 신년 총론 및 12개월 세운 비결서" },
+          monthly: { serviceName: "월간 종합 운세", title: "달마다 변화하는 길흉화복 및 31일 일진 캘린더" },
+          today: { serviceName: "오늘의 일진 상세", title: "오늘 하루 꼭 조심하거나 이행할 행동 지침 처방" }
+        };
+        const meta = metas[urlType] || metas.pyungsaeng;
+        return (
+          <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 text-white rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden border border-slate-800 animate-fadeIn">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+            <div className="relative space-y-4">
+              <div className="flex items-center space-x-2">
+                <span className="px-3 py-1 text-[10px] bg-indigo-500/20 border border-indigo-400/20 rounded-full text-indigo-300 font-bold uppercase tracking-wider">
+                  {meta.serviceName}
+                </span>
+                <span className="px-2 py-0.5 text-[10px] bg-emerald-500/20 border border-emerald-400/20 rounded text-emerald-300 font-bold">
+                  실시간 보정 완료
+                </span>
+              </div>
+              
+              <h2 className="text-2xl md:text-3xl font-black tracking-tight">
+                {chart.normalizedInput.alias}님의 {meta.title}
+              </h2>
+              
+              <p className="text-slate-200 font-serif text-base md:text-lg leading-relaxed max-w-2xl border-l-2 border-amber-400 pl-4 italic">
+                “{sajuPreset.description}”
+              </p>
+            </div>
           </div>
-          
-          <h2 className="text-2xl md:text-3xl font-black tracking-tight">
-            {chart.normalizedInput.alias}님의 상세 명리분석 보고서
-          </h2>
-          
-          <p className="text-slate-200 font-serif text-base md:text-lg leading-relaxed max-w-2xl border-l-2 border-amber-400 pl-4 italic">
-            “{sajuPreset.description}”
-          </p>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* 2. 공통 영역: 사주 원국 카드 */}
       <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-5">
@@ -345,98 +358,9 @@ export function InterpretationResultClient({
         </div>
       </div>
 
-      {/* 3. 공통 영역: 대운 표 */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
-        <h4 className="font-bold text-slate-800 text-sm font-serif">대운 (십년 단위 대세운 기운 흐름)</h4>
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-center border-collapse text-[11px] md:text-xs">
-            <thead>
-              <tr className="bg-slate-50 text-slate-500 border-y border-slate-100">
-                <th className="p-3 font-bold">나이</th>
-                <th className="p-3 font-bold">{chart.luckCycles.startAge}세~</th>
-                <th className="p-3 font-bold">{chart.luckCycles.startAge + 10}세~</th>
-                <th className="p-3 font-bold">{chart.luckCycles.startAge + 20}세~</th>
-                <th className="p-3 font-bold">{chart.luckCycles.startAge + 30}세~</th>
-                <th className="p-3 font-bold">{chart.luckCycles.startAge + 40}세~</th>
-                <th className="p-3 font-bold">{chart.luckCycles.startAge + 50}세~</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b border-slate-100 text-slate-800 font-extrabold font-serif">
-                <td className="p-3 text-slate-400 font-sans font-normal">간지</td>
-                <td className="p-3 text-indigo-700 bg-indigo-50/20">辛卯<br/><span className="text-[9px] font-sans font-bold text-slate-500 font-mono">금/목</span></td>
-                <td className="p-3">庚寅<br/><span className="text-[9px] font-sans font-bold text-slate-500 font-mono">금/목</span></td>
-                <td className="p-3">己丑<br/><span className="text-[9px] font-sans font-bold text-slate-500 font-mono">토/토</span></td>
-                <td className="p-3 text-rose-700 bg-rose-50/20">戊子<br/><span className="text-[9px] font-sans font-bold text-slate-500 font-mono">토/수</span></td>
-                <td className="p-3">丁亥<br/><span className="text-[9px] font-sans font-bold text-slate-500 font-mono">화/수</span></td>
-                <td className="p-3">丙戌<br/><span className="text-[9px] font-sans font-bold text-slate-500 font-mono">화/토</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* 4. 정통운세 / 생활운세 상세 기능 서브 메뉴판 */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-md space-y-6">
-        <div className="grid grid-cols-2 gap-6 border-b border-slate-100 pb-4">
-          <div className="space-y-3">
-            <span className="text-xs font-black text-indigo-800 tracking-wider uppercase border-l-2 border-indigo-600 pl-2">정통운세</span>
-            <div className="flex flex-col space-y-1">
-              {[
-                { id: "pyungsaeng", name: "평생 사주 종합", desc: "초년·중년·말년·가족·직업운" },
-                { id: "tojung", name: "2026 신토정비결", desc: "올해 일어날 대운 및 12개월 세운" },
-                { id: "monthly", name: "월간 종합 운세", desc: "달마다 변화하는 31일 일진 캘린더" }
-              ].map(btn => (
-                <button
-                  key={btn.id}
-                  onClick={() => setActiveTab(btn.id as any)}
-                  className={`text-left p-2.5 rounded-xl border text-xs font-bold transition-all flex justify-between items-center cursor-pointer ${
-                    activeTab === btn.id
-                      ? "border-indigo-600 bg-indigo-50/40 text-indigo-900 shadow-xs"
-                      : "border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                  }`}
-                >
-                  <div className="space-y-0.5">
-                    <span className="block">{btn.name}</span>
-                    <span className="block text-[10px] text-slate-400 font-normal">{btn.desc}</span>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 opacity-60" />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <span className="text-xs font-black text-amber-800 tracking-wider uppercase border-l-2 border-amber-600 pl-2">생활운세</span>
-            <div className="flex flex-col space-y-1">
-              {[
-                { id: "today", name: "오늘의 일진 상세", desc: "오늘 꼭 해야 할 행동 지침과 시간대별 운" },
-                { id: "manse", name: "무료 만세력 조회", desc: "나의 여덟 글자와 오행 분포 그래프" }
-              ].map(btn => (
-                <button
-                  key={btn.id}
-                  onClick={() => setActiveTab(btn.id as any)}
-                  className={`text-left p-2.5 rounded-xl border text-xs font-bold transition-all flex justify-between items-center cursor-pointer ${
-                    activeTab === btn.id
-                      ? "border-amber-500 bg-amber-50/40 text-amber-900 shadow-xs"
-                      : "border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                  }`}
-                >
-                  <div className="space-y-0.5">
-                    <span className="block">{btn.name}</span>
-                    <span className="block text-[10px] text-slate-400 font-normal">{btn.desc}</span>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 opacity-60" />
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* 5. 탭별 실제 결과 화면 노출 */}
-        <div className="pt-2">
+      {/* 3. urlType 전용 탭 레이아웃 */}
           
-          {activeTab === "pyungsaeng" && (
+          {urlType === "pyungsaeng" && (
             <div className="space-y-8 animate-fade-in">
               {/* 1. 실시간 AI API 분석 결과 영역 */}
               {report && report.sections && report.sections.length > 0 && (
@@ -512,33 +436,92 @@ export function InterpretationResultClient({
             </div>
           )}
 
-          {activeTab === "tojung" && (
+          {urlType === "daewun" && (
             <div className="space-y-6 animate-fade-in">
-              <div className="border-b border-slate-100 pb-2">
-                <h3 className="text-lg font-black text-slate-800 font-serif">2026 병오(丙午)년 신토정비결</h3>
-                <p className="text-xs text-slate-400 mt-1">올해 나를 지배하는 천간/지지의 형상 분석과 자산·직업적 대운</p>
-              </div>
-
-              <div className="bg-gradient-to-r from-amber-500/10 to-amber-600/10 p-5 rounded-2xl border border-amber-500/30 space-y-2">
-                <span className="text-[10px] text-amber-600 font-bold tracking-widest uppercase block">YEARLY SUMMARY</span>
-                <h4 className="text-base font-black text-slate-900 leading-relaxed font-serif">“{sajuPreset.tojungSummary}”</h4>
-              </div>
-
-              {[
-                { title: "올해의 재물운", content: sajuPreset.tojungWealth },
-                { title: "올해의 직장 / 사업운", content: sajuPreset.tojungCareer },
-                { title: "올해의 가정 / 건강운", content: sajuPreset.tojungHome },
-                { title: "올해의 이성 / 대인관계", content: sajuPreset.tojungLove }
-              ].map((sect, sIdx) => (
-                <div key={sIdx} className="p-4 bg-white border border-slate-100 rounded-2xl space-y-1.5">
-                  <h4 className="font-extrabold text-xs text-slate-800">{sect.title}</h4>
-                  <p className="text-xs text-slate-600 leading-relaxed font-medium">{sect.content}</p>
+              {/* 대운 표 극대화 배치 */}
+              <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-md space-y-4">
+                <div className="border-b border-slate-100 pb-2 flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-black text-slate-900 font-serif">10대 대운 흐름 분석표</h3>
+                    <p className="text-xs text-slate-400 mt-1">평생 나를 좌우하는 10년 단위의 거시적 에너지 파동</p>
+                  </div>
+                  <span className="px-2.5 py-1 bg-indigo-50 border border-indigo-100 text-indigo-700 font-black rounded-lg text-[10px]">
+                    시작 연령: {chart.luckCycles.startAge}세
+                  </span>
                 </div>
-              ))}
 
+                <div className="overflow-x-auto custom-scrollbar pt-2">
+                  <table className="w-full text-center border-collapse text-xs md:text-sm">
+                    <thead>
+                      <tr className="bg-slate-50 text-slate-600 border-y border-slate-100 font-bold">
+                        <th className="p-4">구분</th>
+                        <th className="p-4">{chart.luckCycles.startAge}세~</th>
+                        <th className="p-4">{chart.luckCycles.startAge + 10}세~</th>
+                        <th className="p-4">{chart.luckCycles.startAge + 20}세~</th>
+                        <th className="p-4">{chart.luckCycles.startAge + 30}세~</th>
+                        <th className="p-4">{chart.luckCycles.startAge + 40}세~</th>
+                        <th className="p-4">{chart.luckCycles.startAge + 50}세~</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-slate-100 text-slate-950 font-black font-serif text-sm md:text-base">
+                        <td className="p-4 text-slate-400 font-sans font-normal text-xs">간지 기류</td>
+                        <td className="p-4 text-indigo-700 bg-indigo-50/30">辛卯<br/><span className="text-[10px] font-sans font-bold text-slate-500 font-mono">금/목</span></td>
+                        <td className="p-4">庚寅<br/><span className="text-[10px] font-sans font-bold text-slate-500 font-mono">금/목</span></td>
+                        <td className="p-4">己丑<br/><span className="text-[10px] font-sans font-bold text-slate-500 font-mono">토/토</span></td>
+                        <td className="p-4 text-rose-700 bg-rose-50/30">戊子<br/><span className="text-[10px] font-sans font-bold text-slate-500 font-mono">토/수</span></td>
+                        <td className="p-4">丁亥<br/><span className="text-[10px] font-sans font-bold text-slate-500 font-mono">화/수</span></td>
+                        <td className="p-4">丙戌<br/><span className="text-[10px] font-sans font-bold text-slate-500 font-mono">화/토</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* 대운 해석 및 조언 카드 */}
+              <div className="bg-gradient-to-br from-indigo-900 to-indigo-950 text-white rounded-2xl p-6 border border-indigo-800 shadow-sm space-y-4">
+                <h4 className="font-extrabold text-sm text-indigo-300 flex items-center space-x-1.5">
+                  <Activity className="w-4 h-4 text-amber-400 animate-pulse" />
+                  <span>대운 전환기 교운기(交運期) 징조 처방전</span>
+                </h4>
+                <p className="text-xs md:text-sm text-slate-200 leading-relaxed font-sans font-medium">
+                  • <strong>교운기(대운이 바뀌기 1~2년 전)의 변화</strong>: 대운이 바뀌기 직전에는 주변 인간관계가 크게 물갈이되거나, 갑작스러운 거주지 이전, 직업 변동 욕구가 거세집니다. 이는 몸속의 탁한 기운을 비워내고 새로운 대운의 에너지를 받아들이기 위한 명리적 우주 정화 작용입니다.<br/>
+                  • <strong>대운 활용 방안</strong>: {sajuPreset.name} 일주인 귀하께서는 기류가 바뀔 때 감정의 쏠림을 주의하고, 일정한 명상이나 독서를 통해 내적인 무게중심을 다잡으실 때 다음 10년의 번영 대운을 온전히 수확하실 수 있습니다.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {urlType === "tojung" && (
+            <div className="space-y-6 animate-fade-in">
+              {/* 토정비결 총평 */}
+              <div className="bg-gradient-to-r from-amber-500/10 to-amber-600/10 p-5 rounded-2xl border border-amber-500/30 space-y-2">
+                <span className="text-[10px] text-amber-600 font-bold tracking-widest uppercase block font-sans">2026 병오(丙午)년 신토정비결 총론</span>
+                <h4 className="text-base md:text-lg font-black text-slate-900 leading-relaxed font-serif">“{sajuPreset.tojungSummary}”</h4>
+              </div>
+
+              {/* 4대 운세 상세 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { title: "💵 올해의 재물운 흐름", content: sajuPreset.tojungWealth },
+                  { title: "💼 올해의 직장 / 사업 운세", content: sajuPreset.tojungCareer },
+                  { title: "🏡 올해의 가정 / 건강 기류", content: sajuPreset.tojungHome },
+                  { title: "❤️ 올해의 이성 / 대인관계", content: sajuPreset.tojungLove }
+                ].map((sect, sIdx) => (
+                  <div key={sIdx} className="p-4.5 bg-white border border-slate-100 rounded-2xl space-y-2 shadow-xs">
+                    <h4 className="font-extrabold text-xs text-indigo-950 flex items-center space-x-1">
+                      <span className="w-1 h-3.5 bg-amber-500 rounded-full"></span>
+                      <span>{sect.title}</span>
+                    </h4>
+                    <p className="text-xs text-slate-700 leading-relaxed font-medium font-sans">{sect.content}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* 12개월 월별 세운 */}
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3">
-                <h4 className="font-extrabold text-sm text-slate-800 font-serif">2026년 1월 ~ 12월 월별 세운</h4>
-                <div className="divide-y divide-slate-200/60 text-xs font-medium text-slate-600 font-sans">
+                <h4 className="font-extrabold text-sm text-slate-800 font-serif">2026년 1월 ~ 12월 월별 상세 비결 리스트</h4>
+                <div className="divide-y divide-slate-200/60 text-xs md:text-sm font-medium text-slate-650 font-sans">
                   {[
                     "1월 : 일이 다소 복잡하게 얽히더라도 조급함을 버리고 건강을 먼저 챙기는 달입니다.",
                     "2월 : 재물운이 집안 마당으로 들어오니 가정이 평안하고 여유가 가득 넘쳐나는 달입니다.",
@@ -553,9 +536,9 @@ export function InterpretationResultClient({
                     "11월 : 재물의 수량이 풍족해지는 시기이니 낭비를 예방하고 고정식 저축을 넓히십시오.",
                     "12월 : 가족 간에 혼사나 경사가 겹치며 평화롭고 따뜻하게 한 해를 마무리합니다."
                   ].map((monText, idx) => (
-                    <div key={idx} className="py-2.5 first:pt-0 last:pb-0 flex items-start space-x-2">
-                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full shrink-0 mt-1.5"></span>
-                      <span>{monText}</span>
+                    <div key={idx} className="py-3 first:pt-0 last:last-pb-0 flex items-start space-x-2.5">
+                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full shrink-0 mt-2"></span>
+                      <span className="leading-relaxed">{monText}</span>
                     </div>
                   ))}
                 </div>
@@ -563,16 +546,14 @@ export function InterpretationResultClient({
             </div>
           )}
 
-          {activeTab === "monthly" && (
+          {urlType === "monthly" && (
             <div className="space-y-6 animate-fade-in">
-              <div className="border-b border-slate-100 pb-2">
-                <h3 className="text-lg font-black text-slate-800 font-serif">7월 월간 종합 운세</h3>
-                <p className="text-xs text-slate-400 mt-1">한 달 간의 전체 일진 기류와 31일 일자별 신살/운세 체크리스트</p>
-              </div>
-
-              <div className="p-4 bg-indigo-50/30 border border-indigo-100/50 rounded-2xl space-y-2">
-                <h4 className="font-extrabold text-xs text-indigo-900">7월 총론</h4>
-                <p className="text-xs text-indigo-950/80 leading-relaxed font-medium">
+              {/* 7월 총론 */}
+              <div className="p-5 bg-indigo-50/40 border border-indigo-100/50 rounded-2xl space-y-2">
+                <h4 className="font-extrabold text-sm text-indigo-900 flex items-center space-x-1.5">
+                  <span>📅 7월 전체 운세 기류 총평</span>
+                </h4>
+                <p className="text-xs md:text-sm text-indigo-950/80 leading-relaxed font-medium">
                   기쁨이 많고 행운이 동반되는 기분 좋은 달입니다. 나의 실속을 철저히 챙기며 후일을 조용히 기약하십시오. 지나치게 자신을 뽐내면 구설이 드니 대인관계를 부드럽게 가져가는 것이 요령입니다.
                 </p>
               </div>
@@ -582,7 +563,7 @@ export function InterpretationResultClient({
                   <h4 className="font-extrabold text-xs text-emerald-800 flex items-center space-x-1.5">
                     <span>💵 7월 재물운</span>
                   </h4>
-                  <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                  <p className="text-[11px] text-slate-650 leading-relaxed font-medium">
                     금전 흐름은 매우 순탄하나 수입을 올리기보다는 불필요한 누수성 지출 관리에 힘써야 합니다. 규모가 큰 거래는 월말로 미루고 절약에 집중하십시오.
                   </p>
                 </div>
@@ -590,28 +571,29 @@ export function InterpretationResultClient({
                   <h4 className="font-extrabold text-xs text-rose-800 flex items-center space-x-1.5">
                     <span>❤️ 7월 애정운</span>
                   </h4>
-                  <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                  <p className="text-[11px] text-slate-650 leading-relaxed font-medium">
                     관계에 약간의 오해가 생기기 쉬우니 감정적 고집을 피하고 대화할 때 귀를 먼저 기울이는 자세가 큰 도움을 줍니다.
                   </p>
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm space-y-3">
-                <h4 className="font-extrabold text-sm text-slate-800 font-serif">7월 일자별 운세 리스트</h4>
-                <div className="max-h-[300px] overflow-y-auto custom-scrollbar border border-slate-100 rounded-xl">
-                  <table className="w-full text-left border-collapse text-[11px]">
+              {/* 31일 일자별 운세 표 */}
+              <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-md space-y-4">
+                <h4 className="font-extrabold text-sm text-slate-900 font-serif">7월 1일 ~ 31일 일일 상세 일진 캘린더</h4>
+                <div className="max-h-[380px] overflow-y-auto custom-scrollbar border border-slate-100 rounded-2xl">
+                  <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold sticky top-0 z-10">
-                        <th className="p-2.5 text-center">일자</th>
-                        <th className="p-2.5 text-center">신살/일주</th>
-                        <th className="p-2.5">오늘의 상세 일진 운세</th>
+                      <tr className="bg-slate-50 border-b border-slate-150 text-slate-600 font-bold sticky top-0 z-10">
+                        <th className="p-3 text-center">날짜</th>
+                        <th className="p-3 text-center">오늘의 신살</th>
+                        <th className="p-3">일일 일진 상세 해설</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100/60 font-medium">
                       {monthlyDays.map((mDay, idx) => (
                         <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="p-2.5 text-center font-extrabold text-slate-700 shrink-0">{mDay.dayStr}</td>
-                          <td className="p-2.5 text-center shrink-0">
+                          <td className="p-3 text-center font-extrabold text-slate-800">{mDay.dayStr}</td>
+                          <td className="p-3 text-center shrink-0">
                             {mDay.shinsal ? (
                               <span className={`px-2 py-0.5 rounded-full text-[9px] font-black ${
                                 mDay.shinsal.includes("천을") ? "bg-amber-100 text-amber-800" :
@@ -623,93 +605,88 @@ export function InterpretationResultClient({
                               <span className="text-slate-300 font-normal">-</span>
                             )}
                           </td>
-                          <td className="p-2.5 text-slate-600 leading-normal">{mDay.fortune}</td>
+                          <td className="p-3 text-slate-650 leading-relaxed font-sans">{mDay.fortune}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               </div>
-
-              <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-[11px] space-y-2">
-                <span className="font-extrabold text-slate-800 block text-xs">7월 생활 처방 및 길일</span>
-                <p className="text-slate-600 leading-relaxed font-sans">
-                  • <strong>이동 및 계약 길일</strong> : 08일, 17일, 19일, 28일이 문서 취득 및 귀인 보조에 탁월한 합일입니다.<br/>
-                  • <strong>조심할 기류 처방전</strong> : 주변에 산재한 화(화) 기운 소품을 다듬고 흙을 밟거나 산행을 하면 유해 기류가 중화됩니다. 행운의 컬러는 <strong>적색, 백색</strong>입니다.
-                </p>
-              </div>
             </div>
           )}
 
-          {activeTab === "today" && (
+          {urlType === "today" && (
             <div className="space-y-6 animate-fade-in">
-              <div className="border-b border-slate-100 pb-2">
-                <h3 className="text-lg font-black text-slate-800 font-serif">오늘의 상세 일진</h3>
-                <p className="text-xs text-slate-400 mt-1">오늘 나의 바이오리듬과 가장 권장되는 리스크 헷징 행동 요령</p>
-              </div>
-
-              <div className="p-5 bg-gradient-to-br from-indigo-900 to-indigo-950 text-white rounded-2xl border border-indigo-700 shadow-sm space-y-3">
-                <span className="text-[10px] text-indigo-300 font-bold block tracking-widest uppercase">TODAY ENERGY POINT</span>
+              {/* 오늘의 기운 */}
+              <div className="p-6 bg-gradient-to-br from-indigo-900 to-indigo-950 text-white rounded-2xl border border-indigo-800 shadow-sm space-y-3">
+                <span className="text-[10px] text-indigo-300 font-bold block tracking-widest uppercase font-sans">TODAY ENERGY POINT</span>
                 <p className="text-xs md:text-sm font-medium leading-relaxed font-serif">
-                  “귀하의 수(水) 기운과 대조할 때, 오늘 하루는 무모한 시도보다 가진 내실을 든든히 다지고 대화 시 상대방을 먼저 공감할 때 인기가 상승하는 날입니다.”
+                  “귀하의 {sajuPreset.element} 기운과 오늘의 천간지지를 대조할 때, 오늘 하루는 무모한 시도보다 가진 내실을 든든히 다지고 대화 시 상대방을 먼저 공감해 줄 때 인연과 재물이 따르는 편안한 날입니다.”
                 </p>
               </div>
 
-              <div className="bg-white border border-slate-100 rounded-2xl p-5 space-y-3">
-                <h4 className="font-extrabold text-xs text-slate-800">시간대별 행동 가이드</h4>
-                <div className="grid grid-cols-3 gap-2.5 text-center text-[10px] font-bold text-slate-600">
-                  <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
-                    <span className="block text-slate-400 font-medium">오전 (09:30~11:29)</span>
-                    <span className="block mt-1 text-slate-800">회의 시 경청하기</span>
+              {/* 시간대별 행동 처방 */}
+              <div className="bg-white border border-slate-100 rounded-2xl p-5 space-y-4 shadow-sm">
+                <h4 className="font-extrabold text-xs text-slate-850 border-l-2 border-amber-500 pl-2">시간대별 행동 가이드 라인</h4>
+                <div className="grid grid-cols-3 gap-3 text-center text-xs font-bold text-slate-700 font-sans">
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                    <span className="block text-slate-400 font-medium text-[10px]">오전 (09:30~11:29)</span>
+                    <span className="block text-slate-900">회의 시 먼저 경청하기</span>
                   </div>
-                  <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
-                    <span className="block text-slate-400 font-medium">오후 (13:30~15:29)</span>
-                    <span className="block mt-1 text-slate-800">계약서 조심하기</span>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                    <span className="block text-slate-400 font-medium text-[10px]">오후 (13:30~15:29)</span>
+                    <span className="block text-slate-900">도장, 계약서 꼼꼼히 체크</span>
                   </div>
-                  <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
-                    <span className="block text-slate-400 font-medium">저녁 (17:30~19:29)</span>
-                    <span className="block mt-1 text-indigo-700">안정적 귀가 및 휴식</span>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                    <span className="block text-slate-400 font-medium text-[10px]">저녁 (17:30~19:29)</span>
+                    <span className="block text-indigo-700">안정적인 귀가 및 온천욕</span>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {activeTab === "manse" && (
+          {urlType === "manse" && (
             <div className="space-y-6 animate-fade-in">
-              <div className="border-b border-slate-100 pb-2">
-                <h3 className="text-lg font-black text-slate-800 font-serif">무료 만세력 오행 분석</h3>
-                <p className="text-xs text-slate-400 mt-1">태어난 시각의 태양 고도 정적 편차와 오행의 밸런스 점수화</p>
-              </div>
+              {/* 오행 그래프 */}
+              <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-md space-y-4">
+                <div className="border-b border-slate-100 pb-2">
+                  <h3 className="text-base font-black text-slate-900 font-serif">사주 오행 분포 배점 분석</h3>
+                  <p className="text-xs text-slate-400 mt-1">태어난 시각의 태양 고도 정적 편차와 오행의 밸런스 점수화</p>
+                </div>
 
-              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4">
-                <h4 className="font-extrabold text-xs text-slate-800">오행 균형 배점 그래프</h4>
-                
-                {[
-                  { el: "wood", name: "목 (나무 기운)", val: chart.elementsDistribution.wood, col: "bg-emerald-600", textCol: "text-emerald-700" },
-                  { el: "fire", name: "화 (태양 기운)", val: chart.elementsDistribution.fire, col: "bg-red-500", textCol: "text-red-700" },
-                  { el: "earth", name: "토 (대지 기운)", val: chart.elementsDistribution.earth, col: "bg-amber-500", textCol: "text-amber-700" },
-                  { el: "metal", name: "금 (원석 기운)", val: chart.elementsDistribution.metal, col: "bg-slate-400", textCol: "text-slate-600" },
-                  { el: "water", name: "수 (샘물 기운)", val: chart.elementsDistribution.water, col: "bg-indigo-900", textCol: "text-indigo-800" }
-                ].map(item => {
-                  const total = Object.values(chart.elementsDistribution).reduce((a, b) => a + b, 0) || 1;
-                  const pct = Math.round((item.val / total) * 100);
-                  return (
-                    <div key={item.el} className="flex items-center space-x-2 text-xs font-bold">
-                      <span className={`w-24 text-left ${item.textCol}`}>{item.name} ({item.val})</span>
-                      <span className="w-8 text-right text-slate-500">{pct}%</span>
-                      <div className="flex-grow bg-slate-200 h-2.5 rounded-full overflow-hidden">
-                        <div className={`${item.col} h-full transition-all duration-300`} style={{ width: `${pct}%` }}></div>
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4">
+                  {[
+                    { el: "wood", name: "목 (나무 기운)", val: chart.elementsDistribution.wood, col: "bg-emerald-600", textCol: "text-emerald-700" },
+                    { el: "fire", name: "화 (태양 기운)", val: chart.elementsDistribution.fire, col: "bg-red-500", textCol: "text-red-700" },
+                    { el: "earth", name: "토 (대지 기운)", val: chart.elementsDistribution.earth, col: "bg-amber-500", textCol: "text-amber-700" },
+                    { el: "metal", name: "금 (원석 기운)", val: chart.elementsDistribution.metal, col: "bg-slate-400", textCol: "text-slate-650" },
+                    { el: "water", name: "수 (샘물 기운)", val: chart.elementsDistribution.water, col: "bg-indigo-900", textCol: "text-indigo-800" }
+                  ].map(item => {
+                    const totalVal = Object.values(chart.elementsDistribution).reduce((a, b) => a + b, 0) || 1;
+                    const pct = Math.round((item.val / totalVal) * 100);
+                    return (
+                      <div key={item.el} className="flex items-center space-x-2 text-xs font-bold font-sans">
+                        <span className={`w-28 text-left ${item.textCol}`}>{item.name} ({item.val}점)</span>
+                        <span className="w-8 text-right text-slate-500">{pct}%</span>
+                        <div className="flex-grow bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                          <div className={`${item.col} h-full transition-all duration-300`} style={{ width: `${pct}%` }}></div>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+
+                {/* 처방 안내 */}
+                <div className="p-4 bg-cream/40 border border-brand-border/60 rounded-xl space-y-1.5 text-xs font-medium text-slate-700 font-sans">
+                  <span className="font-extrabold text-navy block text-xs">오행 조율 추천 색상 및 공간 가이드</span>
+                  <p className="leading-relaxed">
+                    오행의 조율을 위해 귀하의 가장 약한 기운인 기류를 보강해 주는 소품이나 의상(색상)을 매칭하시는 것이 좋습니다. 사주 원국에서 과도하게 한쪽으로 쏠린 에너지를 중화시키면 사업이나 건강상의 리스크를 헷징하는 큰 보살핌이 작용하게 됩니다.
+                  </p>
+                </div>
               </div>
             </div>
           )}
-
-        </div>
-      </div>
 
       {/* 6. 해석 근거 정보 및 데이터 신뢰성 펼쳐보기 */}
       {!isSharedView && (
