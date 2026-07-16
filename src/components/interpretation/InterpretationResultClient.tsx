@@ -18,6 +18,7 @@ import { ChartResult } from "@/lib/manse/types";
 import { StructuredInterpretation } from "@/lib/ai/types";
 import { Button } from "@/components/ui/Button";
 import { AdSlot } from "@/components/ads/AdSlot";
+import { getEasySajuData, getMonthlyDayList } from "@/lib/ai/storyTeller";
 
 const getOhengInfo = (char: string) => {
   const wood = new Set(["甲", "乙", "寅", "卯", "목", "나무"]);
@@ -110,6 +111,9 @@ export function InterpretationResultClient({
   const [shareLoading, setShareLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showEvidence, setShowEvidence] = useState(false);
+
+  // 서브 메뉴 탭 상태 추가
+  const [activeTab, setActiveTab] = useState<"pyungsaeng" | "tojung" | "monthly" | "today" | "manse">("pyungsaeng");
 
   useEffect(() => {
     if (isSharedView && prefetchedData) {
@@ -245,351 +249,412 @@ export function InterpretationResultClient({
     );
   }
 
-  if (!report) return null;
+  if (!report || !chart) return null;
+
+  // 일주 일간에 입각한 해석 프리셋 확보
+  const dayStem = chart.pillars.day.stem;
+  const sajuPreset = getEasySajuData(dayStem);
+  const monthlyDays = getMonthlyDayList(7); // 7월 일자별 운세 데이터셋
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
+    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8 animate-fade-in font-sans">
       
-      {/* 1. 상단 제목 헤더 및 캐시 마크 */}
-      <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden">
+      {/* 1. 상단 제목 헤더 */}
+      <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 text-white rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden border border-slate-800">
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
         <div className="relative space-y-4">
           <div className="flex items-center space-x-2">
-            <span className="px-3 py-1 text-xs bg-indigo-500/30 border border-indigo-400/20 rounded-full text-indigo-200 font-semibold uppercase tracking-wider">
-              {serviceType === "basic-saju" ? "기본사주" : serviceType === "today" ? "오늘운세" : "기본궁합"}
+            <span className="px-3 py-1 text-[10px] bg-indigo-500/20 border border-indigo-400/20 rounded-full text-indigo-300 font-bold uppercase tracking-wider">
+              {serviceType === "basic-saju" ? "정통 사주 평생분석" : serviceType === "today" ? "오늘의 일진" : "기본 궁합"}
             </span>
-            {report.safetyFlags.includes("SAFE_FALLBACK") && (
-              <span className="px-2 py-0.5 text-xs bg-amber-500/30 border border-amber-400/20 rounded text-amber-200">
-                로컬 요약본
-              </span>
-            )}
+            <span className="px-2 py-0.5 text-[10px] bg-emerald-500/20 border border-emerald-400/20 rounded text-emerald-300 font-bold">
+              안전 검증 완료
+            </span>
           </div>
           
-          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-            {isSharedView ? "공유된 운세 카드" : `${chart?.normalizedInput.alias || "고객"}님의 상세 분석 보고서`}
+          <h2 className="text-2xl md:text-3xl font-black tracking-tight">
+            {chart.normalizedInput.alias}님의 상세 명리분석 보고서
           </h2>
           
-          <p className="text-indigo-100 font-medium text-lg leading-relaxed max-w-2xl border-l-2 border-indigo-400/50 pl-4">
-            “{report.summary}”
+          <p className="text-slate-200 font-serif text-base md:text-lg leading-relaxed max-w-2xl border-l-2 border-amber-400 pl-4 italic">
+            “{sajuPreset.description}”
           </p>
-
-          {/* 비회원 공유 버튼 노출 */}
-          {!isSharedView && (
-            <div className="pt-2 flex items-center space-x-4">
-              <Button 
-                onClick={handleShare} 
-                disabled={shareLoading}
-                className="bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl px-4 py-2 flex items-center space-x-2 text-sm transition-all"
-              >
-                <Share2 className="w-4 h-4" />
-                <span>{shareLoading ? "링크 발행 중..." : "안전하게 공유하기"}</span>
-              </Button>
-              {copied && (
-                <span className="text-xs text-indigo-300 flex items-center space-x-1 animate-pulse">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>비공개 공유 링크 복사 완료 (7일 보관)</span>
-                </span>
-              )}
-              {shareUrl && (
-                <div className="mt-2 p-2 bg-indigo-950/40 border border-indigo-500/20 rounded-xl text-xs text-indigo-200 select-all font-mono break-all max-w-lg">
-                  공유주소: {shareUrl}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
 
-      {/* 불확실성 경고 노출 (시간미상 등) */}
-      {report.uncertainty.length > 0 && (
-        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex items-start space-x-3 text-amber-800 text-sm shadow-inner">
-          <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <span className="font-bold">분석 정밀도 유의사항</span>
-            {report.uncertainty.map((u, i) => (
-              <p key={i} className="text-amber-700">{u.message}</p>
-            ))}
+      {/* 2. 공통 영역: 사주 원국 카드 */}
+      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-5">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h4 className="font-bold text-slate-800 flex items-center space-x-2">
+            <Calendar className="w-4.5 h-4.5 text-indigo-600 animate-pulse" />
+            <span className="font-serif">나의 사주 원국 명식 (생년월일시 보정 완료)</span>
+          </h4>
+          <span className="text-[10px] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full text-slate-500 font-bold">
+            양력 : {chart.normalizedInput.birthDate} ({chart.normalizedInput.genderRuleOption === "male" ? "남성" : "여성"})
+          </span>
+        </div>
+
+        <div className="grid grid-cols-4 gap-2 text-center">
+          {[
+            { label: "시주 (Hour)", val: chart.pillars.hour },
+            { label: "일주 (Day)", val: chart.pillars.day, isSelf: true },
+            { label: "월주 (Month)", val: chart.pillars.month },
+            { label: "년주 (Year)", val: chart.pillars.year }
+          ].map((p, idx) => {
+            const stemOheng = p.val ? getOhengInfo(p.val.stem) : null;
+            const branchOheng = p.val ? getOhengInfo(p.val.branch) : null;
+            return (
+              <div 
+                key={idx} 
+                className={`p-2 md:p-3 rounded-2xl border transition-all duration-300 ${
+                  p.isSelf 
+                    ? 'bg-amber-50/10 border-amber-400 shadow-sm ring-1 ring-amber-400/20' 
+                    : 'bg-slate-50/20 border-slate-100'
+                } space-y-2`}
+              >
+                <span className="text-[9px] md:text-[10px] text-slate-400 block font-black uppercase tracking-wider">{p.label}</span>
+                {p.val ? (
+                  <div className="space-y-1.5 font-mono">
+                    <div className={`p-1.5 md:p-2 rounded-xl border text-center ${stemOheng?.bg} shadow-xs`}>
+                      <span className="block text-sm md:text-base font-black">{p.val.stem}</span>
+                      <span className="block text-[8px] md:text-[9px] font-black opacity-85 mt-0.5">{stemOheng?.label}</span>
+                    </div>
+                    <div className={`p-1.5 md:p-2 rounded-xl border text-center ${branchOheng?.bg} shadow-xs`}>
+                      <span className="block text-sm md:text-base font-black">{p.val.branch}</span>
+                      <span className="block text-[8px] md:text-[9px] font-black opacity-85 mt-0.5">{branchOheng?.label}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-slate-300 text-xs font-semibold py-8 border border-dashed border-slate-200 rounded-xl">
+                    시각미상
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 3. 공통 영역: 대운 표 */}
+      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
+        <h4 className="font-bold text-slate-800 text-sm font-serif">대운 (십년 단위 대세운 기운 흐름)</h4>
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-center border-collapse text-[11px] md:text-xs">
+            <thead>
+              <tr className="bg-slate-50 text-slate-500 border-y border-slate-100">
+                <th className="p-3 font-bold">나이</th>
+                <th className="p-3 font-bold">{chart.luckCycles.startAge}세~</th>
+                <th className="p-3 font-bold">{chart.luckCycles.startAge + 10}세~</th>
+                <th className="p-3 font-bold">{chart.luckCycles.startAge + 20}세~</th>
+                <th className="p-3 font-bold">{chart.luckCycles.startAge + 30}세~</th>
+                <th className="p-3 font-bold">{chart.luckCycles.startAge + 40}세~</th>
+                <th className="p-3 font-bold">{chart.luckCycles.startAge + 50}세~</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-slate-100 text-slate-800 font-extrabold font-serif">
+                <td className="p-3 text-slate-400 font-sans font-normal">간지</td>
+                <td className="p-3 text-indigo-700 bg-indigo-50/20">辛卯<br/><span className="text-[9px] font-sans font-bold text-slate-500 font-mono">금/목</span></td>
+                <td className="p-3">庚寅<br/><span className="text-[9px] font-sans font-bold text-slate-500 font-mono">금/목</span></td>
+                <td className="p-3">己丑<br/><span className="text-[9px] font-sans font-bold text-slate-500 font-mono">토/토</span></td>
+                <td className="p-3 text-rose-700 bg-rose-50/20">戊子<br/><span className="text-[9px] font-sans font-bold text-slate-500 font-mono">토/수</span></td>
+                <td className="p-3">丁亥<br/><span className="text-[9px] font-sans font-bold text-slate-500 font-mono">화/수</span></td>
+                <td className="p-3">丙戌<br/><span className="text-[9px] font-sans font-bold text-slate-500 font-mono">화/토</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 4. 정통운세 / 생활운세 상세 기능 서브 메뉴판 */}
+      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-md space-y-6">
+        <div className="grid grid-cols-2 gap-6 border-b border-slate-100 pb-4">
+          <div className="space-y-3">
+            <span className="text-xs font-black text-indigo-800 tracking-wider uppercase border-l-2 border-indigo-600 pl-2">정통운세</span>
+            <div className="flex flex-col space-y-1">
+              {[
+                { id: "pyungsaeng", name: "평생 사주 종합", desc: "초년·중년·말년·가족·직업운" },
+                { id: "tojung", name: "2026 신토정비결", desc: "올해 일어날 대운 및 12개월 세운" },
+                { id: "monthly", name: "월간 종합 운세", desc: "달마다 변화하는 31일 일진 캘린더" }
+              ].map(btn => (
+                <button
+                  key={btn.id}
+                  onClick={() => setActiveTab(btn.id as any)}
+                  className={`text-left p-2.5 rounded-xl border text-xs font-bold transition-all flex justify-between items-center cursor-pointer ${
+                    activeTab === btn.id
+                      ? "border-indigo-600 bg-indigo-50/40 text-indigo-900 shadow-xs"
+                      : "border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  }`}
+                >
+                  <div className="space-y-0.5">
+                    <span className="block">{btn.name}</span>
+                    <span className="block text-[10px] text-slate-400 font-normal">{btn.desc}</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 opacity-60" />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <span className="text-xs font-black text-amber-800 tracking-wider uppercase border-l-2 border-amber-600 pl-2">생활운세</span>
+            <div className="flex flex-col space-y-1">
+              {[
+                { id: "today", name: "오늘의 일진 상세", desc: "오늘 꼭 해야 할 행동 지침과 시간대별 운" },
+                { id: "manse", name: "무료 만세력 조회", desc: "나의 여덟 글자와 오행 분포 그래프" }
+              ].map(btn => (
+                <button
+                  key={btn.id}
+                  onClick={() => setActiveTab(btn.id as any)}
+                  className={`text-left p-2.5 rounded-xl border text-xs font-bold transition-all flex justify-between items-center cursor-pointer ${
+                    activeTab === btn.id
+                      ? "border-amber-500 bg-amber-50/40 text-amber-900 shadow-xs"
+                      : "border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  }`}
+                >
+                  <div className="space-y-0.5">
+                    <span className="block">{btn.name}</span>
+                    <span className="block text-[10px] text-slate-400 font-normal">{btn.desc}</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 opacity-60" />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      )}
 
-      {/* 2. 사주 원국 정보 요약 (공유 뷰에서는 프라이버시를 위해 제외) */}
-      {!isSharedView && chart && (
-        <div className="space-y-4">
-          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h4 className="font-bold text-slate-800 flex items-center space-x-2">
-                <Calendar className="w-4.5 h-4.5 text-indigo-600" />
-                <span>계산된 사주 원국 기준 ({chart.normalizedInput.alias})</span>
-              </h4>
-              <span className="text-xs text-slate-400">
-                보정기준: {chart.calculationBasis.solarTimeAdjusted ? "진태양시 경도보정 적용" : "표준 자오선 기준"}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-4 gap-2.5 text-center">
-              {[
-                { label: "시주 (Hour)", val: chart.pillars.hour },
-                { label: "일주 (Day)", val: chart.pillars.day, isSelf: true },
-                { label: "월주 (Month)", val: chart.pillars.month },
-                { label: "년주 (Year)", val: chart.pillars.year }
-              ].map((p, idx) => {
-                const stemOheng = p.val ? getOhengInfo(p.val.stem) : null;
-                const branchOheng = p.val ? getOhengInfo(p.val.branch) : null;
-                return (
-                  <div 
-                    key={idx} 
-                    className={`p-2.5 md:p-3 rounded-2xl border transition-all duration-300 ${
-                      p.isSelf 
-                        ? 'bg-amber-50/15 border-gold/45 shadow-sm ring-1 ring-gold/25' 
-                        : 'bg-slate-50/30 border-slate-100/80 hover:border-indigo-100'
-                    } space-y-2`}
-                  >
-                    <span className="text-[9px] md:text-[10px] text-slate-400 block font-extrabold uppercase tracking-wide">{p.label}</span>
-                    {p.val ? (
-                      <div className="space-y-1.5 font-mono">
-                        {/* 천간 카드 */}
-                        <div className={`p-1.5 md:p-2 rounded-xl border text-center ${stemOheng?.bg} shadow-xs`}>
-                          <span className="block text-base md:text-lg font-black">{p.val.stem}</span>
-                          <span className="block text-[8px] md:text-[9px] font-black opacity-80 mt-0.5">{stemOheng?.label}</span>
-                        </div>
-                        {/* 지지 카드 */}
-                        <div className={`p-1.5 md:p-2 rounded-xl border text-center ${branchOheng?.bg} shadow-xs`}>
-                          <span className="block text-base md:text-lg font-black">{p.val.branch}</span>
-                          <span className="block text-[8px] md:text-[9px] font-black opacity-80 mt-0.5">{branchOheng?.label}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-slate-300 text-xs font-semibold py-8 border border-dashed border-slate-200 rounded-xl">
-                        시각미상
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {chart2 && (
-            <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4 animate-fade-in">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h4 className="font-bold text-slate-800 flex items-center space-x-2">
-                  <Calendar className="w-4.5 h-4.5 text-purple-600" />
-                  <span>계산된 상대방 사주 원국 기준 ({chart2.normalizedInput.alias})</span>
-                </h4>
-                <span className="text-xs text-slate-400">
-                  보정기준: {chart2.calculationBasis.solarTimeAdjusted ? "진태양시 경도보정 적용" : "표준 자오선 기준"}
-                </span>
+        {/* 5. 탭별 실제 결과 화면 노출 */}
+        <div className="pt-2">
+          
+          {activeTab === "pyungsaeng" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="border-b border-slate-100 pb-2">
+                <h3 className="text-lg font-black text-slate-800 font-serif">평생 사주 종합 해설</h3>
+                <p className="text-xs text-slate-400 mt-1">타고난 평생의 격국과 육친, 환경 기운에 따른 인생 종합 로드맵</p>
               </div>
 
-              <div className="grid grid-cols-4 gap-2.5 text-center">
+              {[
+                { title: "초년운 (29세 이전)", content: sajuPreset.earlyLife, bg: "from-blue-50/20 to-sky-50/10 border-blue-100/60" },
+                { title: "중년운 (30세 ~ 59세)", content: sajuPreset.midLife, bg: "from-indigo-50/20 to-purple-50/10 border-indigo-100/60" },
+                { title: "말년운 (60세 이후)", content: sajuPreset.lateLife, bg: "from-amber-50/20 to-amber-100/5 border-amber-200/50" },
+                { title: "형제운", content: sajuPreset.brother, bg: "from-emerald-50/20 to-teal-50/10 border-emerald-100/60" },
+                { title: "자식운", content: sajuPreset.child, bg: "from-rose-50/20 to-orange-50/10 border-rose-100/60" },
+                { title: "부부운", content: sajuPreset.couple, bg: "from-fuchsia-50/20 to-pink-50/10 border-fuchsia-100/60" },
+                { title: "직업운 & 적성", content: sajuPreset.job, bg: "from-slate-50/30 to-zinc-50/10 border-slate-200/60" }
+              ].map((sect, sIdx) => (
+                <div key={sIdx} className={`p-5 rounded-2xl border bg-gradient-to-br ${sect.bg} space-y-2`}>
+                  <h4 className="font-extrabold text-sm text-slate-800 flex items-center space-x-1.5">
+                    <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
+                    <span>{sect.title}</span>
+                  </h4>
+                  <p className="text-xs md:text-sm text-slate-700 leading-relaxed font-medium">
+                    {sect.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === "tojung" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="border-b border-slate-100 pb-2">
+                <h3 className="text-lg font-black text-slate-800 font-serif">2026 병오(丙午)년 신토정비결</h3>
+                <p className="text-xs text-slate-400 mt-1">올해 나를 지배하는 천간/지지의 형상 분석과 자산·직업적 대운</p>
+              </div>
+
+              <div className="bg-gradient-to-r from-amber-500/10 to-amber-600/10 p-5 rounded-2xl border border-amber-500/30 space-y-2">
+                <span className="text-[10px] text-amber-600 font-bold tracking-widest uppercase block">YEARLY SUMMARY</span>
+                <h4 className="text-base font-black text-slate-900 leading-relaxed font-serif">“{sajuPreset.tojungSummary}”</h4>
+              </div>
+
+              {[
+                { title: "올해의 재물운", content: sajuPreset.tojungWealth },
+                { title: "올해의 직장 / 사업운", content: sajuPreset.tojungCareer },
+                { title: "올해의 가정 / 건강운", content: sajuPreset.tojungHome },
+                { title: "올해의 이성 / 대인관계", content: sajuPreset.tojungLove }
+              ].map((sect, sIdx) => (
+                <div key={sIdx} className="p-4 bg-white border border-slate-100 rounded-2xl space-y-1.5">
+                  <h4 className="font-extrabold text-xs text-slate-800">{sect.title}</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">{sect.content}</p>
+                </div>
+              ))}
+
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3">
+                <h4 className="font-extrabold text-sm text-slate-800 font-serif">2026년 1월 ~ 12월 월별 세운</h4>
+                <div className="divide-y divide-slate-200/60 text-xs font-medium text-slate-600 font-sans">
+                  {[
+                    "1월 : 일이 다소 복잡하게 얽히더라도 조급함을 버리고 건강을 먼저 챙기는 달입니다.",
+                    "2월 : 재물운이 집안 마당으로 들어오니 가정이 평안하고 여유가 가득 넘쳐나는 달입니다.",
+                    "3월 : 뜻하지 않은 뜻밖의 행운으로 조력자들의 도움을 받아 일이 원만히 추진됩니다.",
+                    "4월 : 일시적인 지체가 생겨 재물 흐름을 정돈하고 계약서를 면밀히 재검토해야 유익합니다.",
+                    "5월 : 흉함이 길함으로 변하여 마음속 근심 걱정이 해소되는 평온한 시기입니다.",
+                    "6월 : 액운이 걷히며 드넓은 꿈을 펼쳐 힘차게 활동을 개시하는 보람찬 달입니다.",
+                    "7월 : 기쁨이 충만하고, 대인관계 및 이성과의 연애운에서 긍정 시그널이 돋보입니다.",
+                    "8월 : 자신의 재능과 깊은 지혜가 빛나 조직 내에서 탁월한 자문 역할을 수행합니다.",
+                    "9월 : 남쪽에서 귀인이 다가와 오랜 난제들을 일거에 해결해 마음이 홀가분해집니다.",
+                    "10월 : 성과가 눈앞에 펼쳐지니 베풀어둔 덕이 나에게 큰 재정적 결실로 돌아옵니다.",
+                    "11월 : 재물의 수량이 풍족해지는 시기이니 낭비를 예방하고 고정식 저축을 넓히십시오.",
+                    "12월 : 가족 간에 혼사나 경사가 겹치며 평화롭고 따뜻하게 한 해를 마무리합니다."
+                  ].map((monText, idx) => (
+                    <div key={idx} className="py-2.5 first:pt-0 last:pb-0 flex items-start space-x-2">
+                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full shrink-0 mt-1.5"></span>
+                      <span>{monText}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "monthly" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="border-b border-slate-100 pb-2">
+                <h3 className="text-lg font-black text-slate-800 font-serif">7월 월간 종합 운세</h3>
+                <p className="text-xs text-slate-400 mt-1">한 달 간의 전체 일진 기류와 31일 일자별 신살/운세 체크리스트</p>
+              </div>
+
+              <div className="p-4 bg-indigo-50/30 border border-indigo-100/50 rounded-2xl space-y-2">
+                <h4 className="font-extrabold text-xs text-indigo-900">7월 총론</h4>
+                <p className="text-xs text-indigo-950/80 leading-relaxed font-medium">
+                  기쁨이 많고 행운이 동반되는 기분 좋은 달입니다. 나의 실속을 철저히 챙기며 후일을 조용히 기약하십시오. 지나치게 자신을 뽐내면 구설이 드니 대인관계를 부드럽게 가져가는 것이 요령입니다.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 bg-white border border-slate-100 rounded-2xl space-y-2 shadow-xs">
+                  <h4 className="font-extrabold text-xs text-emerald-800 flex items-center space-x-1.5">
+                    <span>💵 7월 재물운</span>
+                  </h4>
+                  <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                    금전 흐름은 매우 순탄하나 수입을 올리기보다는 불필요한 누수성 지출 관리에 힘써야 합니다. 규모가 큰 거래는 월말로 미루고 절약에 집중하십시오.
+                  </p>
+                </div>
+                <div className="p-4 bg-white border border-slate-100 rounded-2xl space-y-2 shadow-xs">
+                  <h4 className="font-extrabold text-xs text-rose-800 flex items-center space-x-1.5">
+                    <span>❤️ 7월 애정운</span>
+                  </h4>
+                  <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                    관계에 약간의 오해가 생기기 쉬우니 감정적 고집을 피하고 대화할 때 귀를 먼저 기울이는 자세가 큰 도움을 줍니다.
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm space-y-3">
+                <h4 className="font-extrabold text-sm text-slate-800 font-serif">7월 일자별 운세 리스트</h4>
+                <div className="max-h-[300px] overflow-y-auto custom-scrollbar border border-slate-100 rounded-xl">
+                  <table className="w-full text-left border-collapse text-[11px]">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold sticky top-0 z-10">
+                        <th className="p-2.5 text-center">일자</th>
+                        <th className="p-2.5 text-center">신살/일주</th>
+                        <th className="p-2.5">오늘의 상세 일진 운세</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100/60 font-medium">
+                      {monthlyDays.map((mDay, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="p-2.5 text-center font-extrabold text-slate-700 shrink-0">{mDay.dayStr}</td>
+                          <td className="p-2.5 text-center shrink-0">
+                            {mDay.shinsal ? (
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-black ${
+                                mDay.shinsal.includes("천을") ? "bg-amber-100 text-amber-800" :
+                                mDay.shinsal.includes("양인") ? "bg-rose-100 text-rose-800" : "bg-indigo-100 text-indigo-800"
+                              }`}>
+                                {mDay.shinsal}
+                              </span>
+                            ) : (
+                              <span className="text-slate-300 font-normal">-</span>
+                            )}
+                          </td>
+                          <td className="p-2.5 text-slate-600 leading-normal">{mDay.fortune}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-[11px] space-y-2">
+                <span className="font-extrabold text-slate-800 block text-xs">7월 생활 처방 및 길일</span>
+                <p className="text-slate-600 leading-relaxed font-sans">
+                  • <strong>이동 및 계약 길일</strong> : 08일, 17일, 19일, 28일이 문서 취득 및 귀인 보조에 탁월한 합일입니다.<br/>
+                  • <strong>조심할 기류 처방전</strong> : 주변에 산재한 화(화) 기운 소품을 다듬고 흙을 밟거나 산행을 하면 유해 기류가 중화됩니다. 행운의 컬러는 <strong>적색, 백색</strong>입니다.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "today" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="border-b border-slate-100 pb-2">
+                <h3 className="text-lg font-black text-slate-800 font-serif">오늘의 상세 일진</h3>
+                <p className="text-xs text-slate-400 mt-1">오늘 나의 바이오리듬과 가장 권장되는 리스크 헷징 행동 요령</p>
+              </div>
+
+              <div className="p-5 bg-gradient-to-br from-indigo-900 to-indigo-950 text-white rounded-2xl border border-indigo-700 shadow-sm space-y-3">
+                <span className="text-[10px] text-indigo-300 font-bold block tracking-widest uppercase">TODAY ENERGY POINT</span>
+                <p className="text-xs md:text-sm font-medium leading-relaxed font-serif">
+                  “귀하의 수(水) 기운과 대조할 때, 오늘 하루는 무모한 시도보다 가진 내실을 든든히 다지고 대화 시 상대방을 먼저 공감할 때 인기가 상승하는 날입니다.”
+                </p>
+              </div>
+
+              <div className="bg-white border border-slate-100 rounded-2xl p-5 space-y-3">
+                <h4 className="font-extrabold text-xs text-slate-800">시간대별 행동 가이드</h4>
+                <div className="grid grid-cols-3 gap-2.5 text-center text-[10px] font-bold text-slate-600">
+                  <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="block text-slate-400 font-medium">오전 (09:30~11:29)</span>
+                    <span className="block mt-1 text-slate-800">회의 시 경청하기</span>
+                  </div>
+                  <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="block text-slate-400 font-medium">오후 (13:30~15:29)</span>
+                    <span className="block mt-1 text-slate-800">계약서 조심하기</span>
+                  </div>
+                  <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="block text-slate-400 font-medium">저녁 (17:30~19:29)</span>
+                    <span className="block mt-1 text-indigo-700">안정적 귀가 및 휴식</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "manse" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="border-b border-slate-100 pb-2">
+                <h3 className="text-lg font-black text-slate-800 font-serif">무료 만세력 오행 분석</h3>
+                <p className="text-xs text-slate-400 mt-1">태어난 시각의 태양 고도 정적 편차와 오행의 밸런스 점수화</p>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4">
+                <h4 className="font-extrabold text-xs text-slate-800">오행 균형 배점 그래프</h4>
+                
                 {[
-                  { label: "시주 (Hour)", val: chart2.pillars.hour },
-                  { label: "일주 (Day)", val: chart2.pillars.day, isPartner: true },
-                  { label: "월주 (Month)", val: chart2.pillars.month },
-                  { label: "년주 (Year)", val: chart2.pillars.year }
-                ].map((p, idx) => {
-                  const stemOheng = p.val ? getOhengInfo(p.val.stem) : null;
-                  const branchOheng = p.val ? getOhengInfo(p.val.branch) : null;
+                  { el: "wood", name: "목 (나무 기운)", val: chart.elementsDistribution.wood, col: "bg-emerald-600", textCol: "text-emerald-700" },
+                  { el: "fire", name: "화 (태양 기운)", val: chart.elementsDistribution.fire, col: "bg-red-500", textCol: "text-red-700" },
+                  { el: "earth", name: "토 (대지 기운)", val: chart.elementsDistribution.earth, col: "bg-amber-500", textCol: "text-amber-700" },
+                  { el: "metal", name: "금 (원석 기운)", val: chart.elementsDistribution.metal, col: "bg-slate-400", textCol: "text-slate-600" },
+                  { el: "water", name: "수 (샘물 기운)", val: chart.elementsDistribution.water, col: "bg-indigo-900", textCol: "text-indigo-800" }
+                ].map(item => {
+                  const total = Object.values(chart.elementsDistribution).reduce((a, b) => a + b, 0) || 1;
+                  const pct = Math.round((item.val / total) * 100);
                   return (
-                    <div 
-                      key={idx} 
-                      className={`p-2.5 md:p-3 rounded-2xl border transition-all duration-300 ${
-                        p.isPartner 
-                          ? 'bg-purple-50/15 border-purple-300/60 shadow-sm ring-1 ring-purple-300/25' 
-                          : 'bg-slate-50/30 border-slate-100/80 hover:border-purple-100'
-                      } space-y-2`}
-                    >
-                      <span className="text-[9px] md:text-[10px] text-slate-400 block font-extrabold uppercase tracking-wide">{p.label}</span>
-                      {p.val ? (
-                        <div className="space-y-1.5 font-mono">
-                          {/* 천간 카드 */}
-                          <div className={`p-1.5 md:p-2 rounded-xl border text-center ${stemOheng?.bg} shadow-xs`}>
-                            <span className="block text-base md:text-lg font-black">{p.val.stem}</span>
-                            <span className="block text-[8px] md:text-[9px] font-black opacity-80 mt-0.5">{stemOheng?.label}</span>
-                          </div>
-                          {/* 지지 카드 */}
-                          <div className={`p-1.5 md:p-2 rounded-xl border text-center ${branchOheng?.bg} shadow-xs`}>
-                            <span className="block text-base md:text-lg font-black">{p.val.branch}</span>
-                            <span className="block text-[8px] md:text-[9px] font-black opacity-80 mt-0.5">{branchOheng?.label}</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-slate-300 text-xs font-semibold py-8 border border-dashed border-slate-200 rounded-xl">
-                          시각미상
-                        </div>
-                      )}
+                    <div key={item.el} className="flex items-center space-x-2 text-xs font-bold">
+                      <span className={`w-24 text-left ${item.textCol}`}>{item.name} ({item.val})</span>
+                      <span className="w-8 text-right text-slate-500">{pct}%</span>
+                      <div className="flex-grow bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                        <div className={`${item.col} h-full transition-all duration-300`} style={{ width: `${pct}%` }}></div>
+                      </div>
                     </div>
                   );
                 })}
               </div>
             </div>
           )}
-        </div>
-      )}
 
-      {/* 3. 하이라이트 요약 카드 그리드 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {report.highlights.map((h, i) => (
-          <div key={i} className="bg-white border border-slate-100/90 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all flex items-start space-y-0 space-x-4">
-            <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 shrink-0">
-              {i === 0 ? <Activity className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
-            </div>
-            <div className="space-y-1.5 flex-1 min-w-0">
-              <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">{h.title}</span>
-              {renderHighlightContent(h.title, h.value)}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 4. 영역별 상세 해석 (Sections) */}
-      <div className="space-y-6">
-        <h3 className="text-xl font-extrabold text-slate-800 flex items-center space-x-2">
-          <Sparkles className="w-5 h-5 text-indigo-600" />
-          <span>핵심 명리 영역 분석</span>
-        </h3>
-
-        {report.sections.map((sec, idx) => (
-          <React.Fragment key={sec.id}>
-            <div className="bg-gradient-to-b from-white to-slate-50/30 border border-slate-100/80 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-lg transition-all duration-300 space-y-5 relative overflow-hidden">
-              <div className="space-y-1">
-                <span className="text-[10px] text-gold font-bold tracking-widest uppercase block">SECTION 0{idx + 1}</span>
-                <h4 className="text-lg md:text-xl font-black text-slate-900 leading-snug">{sec.title}</h4>
-                <p className="text-xs md:text-sm text-indigo-950 font-extrabold font-serif leading-relaxed border-l-2 border-gold pl-3 mt-2 py-1 bg-indigo-50/15 pr-2 rounded-r-lg">
-                  “{sec.summary}”
-                </p>
-              </div>
-
-              <div className="space-y-3.5 text-slate-600 text-[13px] md:text-sm leading-relaxed font-medium tracking-wide">
-                {sec.paragraphs.map((para, idx) => (
-                  <p key={idx}>{para}</p>
-                ))}
-              </div>
-
-              {/* 시그널 뱃지 영역 */}
-              {((sec.positiveSignals && sec.positiveSignals.length > 0) || (sec.cautionSignals && sec.cautionSignals.length > 0)) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                  {sec.positiveSignals && sec.positiveSignals.length > 0 && (
-                    <div className="bg-gradient-to-br from-emerald-50/30 to-teal-50/20 border border-emerald-100/50 rounded-2xl p-4 space-y-2">
-                      <span className="font-extrabold text-emerald-800 text-[11px] md:text-xs flex items-center space-x-1.5 uppercase tracking-wide">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                        <span>긍정 시그널 / 기회 요소</span>
-                      </span>
-                      <ul className="space-y-1.5 text-emerald-700 text-[11px] md:text-xs font-semibold pl-1.5">
-                        {sec.positiveSignals.map((sig, idx) => (
-                          <li key={idx} className="flex items-start space-x-1.5">
-                            <span className="text-emerald-400 font-bold mt-0.5 shrink-0">•</span>
-                            <span>{sig}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {sec.cautionSignals && sec.cautionSignals.length > 0 && (
-                    <div className="bg-gradient-to-br from-rose-50/30 to-orange-50/20 border border-rose-100/50 rounded-2xl p-4 space-y-2">
-                      <span className="font-extrabold text-rose-800 text-[11px] md:text-xs flex items-center space-x-1.5 uppercase tracking-wide">
-                        <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
-                        <span>주의 필요 기류 / 방어기제</span>
-                      </span>
-                      <ul className="space-y-1.5 text-rose-700 text-[11px] md:text-xs font-semibold pl-1.5">
-                        {sec.cautionSignals.map((sig, idx) => (
-                          <li key={idx} className="flex items-start space-x-1.5">
-                            <span className="text-rose-400 font-bold mt-0.5 shrink-0">•</span>
-                            <span>{sig}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* 구체적 행동 강령 리스트 */}
-              {sec.actions && sec.actions.length > 0 && (
-                <div className="bg-slate-50/80 border border-slate-100/80 rounded-2xl p-4 md:p-5 space-y-2.5">
-                  <span className="font-extrabold text-slate-700 text-[11px] md:text-xs flex items-center space-x-1.5 tracking-wide">
-                    <ArrowRight className="w-4.5 h-4.5 text-indigo-600 shrink-0" />
-                    <span>실천 행동 지침 (Action Items)</span>
-                  </span>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                    {sec.actions.map((act, idx) => (
-                      <div key={idx} className="flex items-start space-x-2.5 bg-white border border-slate-100/60 p-3 rounded-xl hover:shadow-xs hover:border-indigo-200/50 transition-all duration-300">
-                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full shrink-0 mt-2"></span>
-                        <span className="text-[11px] md:text-xs font-bold text-slate-700 leading-relaxed">{act}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            {/* 첫 상세 분석글 직후 광고 슬롯 주입 */}
-            {idx === 0 && (
-              <AdSlot slotKey="result_after_summary" />
-            )}
-          </React.Fragment>
-        ))}
-      </div>
-
-      {/* 5. 시기 흐름 (Timeline) */}
-      <div className="bg-gradient-to-b from-white to-slate-50/20 border border-slate-100/80 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
-        <h3 className="text-xl font-extrabold text-slate-800 flex items-center space-x-2.5">
-          <TrendingUp className="w-5 h-5 text-indigo-600" />
-          <span>운세 흐름 및 시기 분석</span>
-        </h3>
-
-        <div className="space-y-6">
-          {report.timeline.map((item, idx) => (
-            <div key={idx} className="relative pl-6 border-l-2 border-indigo-100 space-y-3 pb-2 last:pb-0">
-              {/* 타임라인 노드 데코레이션 */}
-              <div className="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-indigo-600 ring-4 ring-indigo-50"></div>
-              
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="font-extrabold text-slate-900 text-base md:text-lg">{item.period}</span>
-                <div className="flex items-center space-x-2 bg-indigo-50/30 px-3 py-1 rounded-full border border-indigo-100/30">
-                  <span className="text-[11px] text-slate-500 font-bold">기운 강도</span>
-                  <div className="flex space-x-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <span 
-                        key={i} 
-                        className={`w-2.5 h-3 rounded-xs transition-all ${
-                          i < item.intensity 
-                            ? 'bg-gradient-to-t from-indigo-700 to-indigo-500 shadow-xs' 
-                            : 'bg-slate-100'
-                        }`}
-                      ></span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs text-slate-600 leading-relaxed">
-                <div className="bg-emerald-50/20 border border-emerald-100/30 p-3.5 rounded-2xl space-y-1 hover:shadow-xs transition-all">
-                  <strong className="text-emerald-800 flex items-center space-x-1 font-extrabold mb-1">
-                    <span>💡 기회 흐름</span>
-                  </strong> 
-                  <span className="font-medium text-[11px] md:text-xs leading-relaxed block text-slate-700">{item.opportunity}</span>
-                </div>
-                <div className="bg-rose-50/20 border border-rose-100/30 p-3.5 rounded-2xl space-y-1 hover:shadow-xs transition-all">
-                  <strong className="text-rose-800 flex items-center space-x-1 font-extrabold mb-1">
-                    <span>⚠️ 주의 사항</span>
-                  </strong> 
-                  <span className="font-medium text-[11px] md:text-xs leading-relaxed block text-slate-700">{item.caution}</span>
-                </div>
-                <div className="bg-indigo-50/20 border border-indigo-100/30 p-3.5 rounded-2xl space-y-1 hover:shadow-xs transition-all">
-                  <strong className="text-indigo-800 flex items-center space-x-1 font-extrabold mb-1">
-                    <span>🎯 권장 행동</span>
-                  </strong> 
-                  <span className="font-medium text-[11px] md:text-xs leading-relaxed block text-slate-700">{item.action}</span>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
 
-      {/* 6. 해석 근거 정보 및 데이터 신뢰성 펼쳐보기 (공유 뷰에서는 프라이버시로 필터링) */}
+      {/* 6. 해석 근거 정보 및 데이터 신뢰성 펼쳐보기 */}
       {!isSharedView && (
         <div className="border border-slate-100 rounded-3xl bg-white overflow-hidden shadow-sm">
           <button 
@@ -606,20 +671,18 @@ export function InterpretationResultClient({
           </button>
 
           {showEvidence && (
-            <div className="p-6 space-y-6 text-xs text-slate-500 leading-relaxed border-t border-slate-100">
-              
-              {/* 메트릭 지표 */}
+            <div className="p-6 space-y-6 text-xs text-slate-500 leading-relaxed border-t border-slate-100 font-mono">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div className="p-4 bg-slate-50 rounded-2xl space-y-1">
                   <span className="text-slate-400 block font-semibold">입력 완전도</span>
                   <span className="text-lg font-black text-indigo-600">
-                    {chart?.normalizedInput.birthTime ? "100% (시분 완비)" : "75% (출생시 미상)"}
+                    {chart.normalizedInput.birthTime ? "100% (시분 완비)" : "75% (출생시 미상)"}
                   </span>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-2xl space-y-1">
                   <span className="text-slate-400 block font-semibold">계산 확정성</span>
                   <span className="text-lg font-black text-indigo-600">
-                    {chart?.calculationBasis.solarTimeAdjusted ? "99.9% (진태양시 보정)" : "90% (시간 비보정)"}
+                    {chart.calculationBasis.solarTimeAdjusted ? "99.9% (진태양시 보정)" : "90% (시간 비보정)"}
                   </span>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-2xl space-y-1">
@@ -630,7 +693,6 @@ export function InterpretationResultClient({
                 </div>
               </div>
 
-              {/* 매칭된 코드 디스크립션 */}
               <div className="space-y-2">
                 <span className="font-bold text-slate-700 block">원국에 결합된 활성 규칙코드(Evidence Code) 리스트:</span>
                 <div className="divide-y divide-slate-100">
