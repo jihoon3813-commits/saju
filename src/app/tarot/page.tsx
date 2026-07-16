@@ -94,7 +94,8 @@ export default function TarotPage() {
         icon: <Sparkles className="w-6 h-6 text-amber-400" />,
         bg: "from-indigo-950 via-purple-900 to-slate-900",
         label: "메이저 아르카나",
-        border: "border-amber-400/50"
+        border: "border-amber-400/50",
+        imageUrl: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=400"
       };
     }
     switch (suit) {
@@ -103,35 +104,40 @@ export default function TarotPage() {
           icon: <Flame className="w-6 h-6 text-red-400 animate-pulse" />,
           bg: "from-amber-950 via-red-950 to-slate-900",
           label: "완즈 (지혜/열정)",
-          border: "border-red-400/40"
+          border: "border-red-400/40",
+          imageUrl: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=400"
         };
       case "cups":
         return {
           icon: <GlassWater className="w-6 h-6 text-blue-400" />,
           bg: "from-sky-950 via-indigo-950 to-slate-900",
           label: "컵 (감정/인간관계)",
-          border: "border-blue-400/40"
+          border: "border-blue-400/40",
+          imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=400"
         };
       case "swords":
         return {
           icon: <Sword className="w-6 h-6 text-slate-300" />,
           bg: "from-slate-950 via-zinc-900 to-neutral-900",
           label: "소드 (이성/갈등)",
-          border: "border-slate-400/30"
+          border: "border-slate-400/30",
+          imageUrl: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?q=80&w=400"
         };
       case "pentacles":
         return {
           icon: <Coins className="w-6 h-6 text-emerald-400" />,
           bg: "from-emerald-950 via-teal-950 to-slate-900",
           label: "펜타클 (재물/물질)",
-          border: "border-emerald-400/40"
+          border: "border-emerald-400/40",
+          imageUrl: "https://images.unsplash.com/photo-1618042164219-62c820f10723?q=80&w=400"
         };
       default:
         return {
           icon: <Sparkles className="w-6 h-6 text-yellow-400" />,
           bg: "from-slate-900 to-slate-950",
           label: "마이너",
-          border: "border-yellow-400/30"
+          border: "border-yellow-400/30",
+          imageUrl: "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=400"
         };
     }
   };
@@ -219,22 +225,31 @@ export default function TarotPage() {
                   <div
                     key={idx}
                     onClick={() => handleCardClick(idx)}
-                    className={`group relative cursor-pointer aspect-[2/3.3] rounded-xl p-1.5 flex flex-col items-center justify-between text-center transition-all select-none border ${
+                    className={`group relative cursor-pointer aspect-[2/3.3] rounded-xl p-1.5 flex flex-col items-center justify-between text-center transition-all select-none border overflow-hidden ${
                       isSelected
                         ? "bg-gold/15 border-gold shadow-md scale-95"
-                        : "bg-white border-brand-border hover:border-gold/50 hover:-translate-y-1 hover:shadow-sm"
+                        : "bg-slate-900 border-brand-border hover:border-gold/50 hover:-translate-y-1 hover:shadow-sm"
                     }`}
                   >
+                    {/* 카드 뒷면 우주 성운 텍스처 배경 */}
+                    {!isSelected && (
+                      <img 
+                        src="https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=150" 
+                        alt="카드 뒷면" 
+                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500 pointer-events-none"
+                      />
+                    )}
+
                     {/* 카드 장식 뒷면 */}
-                    <div className="absolute inset-0.5 border border-gold/10 rounded-lg pointer-events-none flex flex-col justify-between p-1.5">
+                    <div className="absolute inset-0.5 border border-gold/20 rounded-lg pointer-events-none flex flex-col justify-between p-1.5 z-10 bg-slate-950/20 backdrop-blur-[0.5px]">
                       <div className="w-full flex justify-between">
-                        <span className="text-[7px] text-gold/30">D&F</span>
-                        <span className="text-[7px] text-gold/30">TAROT</span>
+                        <span className="text-[7px] text-gold/60 font-semibold">D&F</span>
+                        <span className="text-[7px] text-gold/60 font-semibold">TAROT</span>
                       </div>
                       <div className="self-center">
-                        <Moon className={`w-4 h-4 ${isSelected ? "text-gold animate-spin-slow" : "text-gold/25 group-hover:text-gold/45"}`} />
+                        <Moon className={`w-4.5 h-4.5 ${isSelected ? "text-gold animate-spin-slow" : "text-gold/50 group-hover:text-gold/80 group-hover:scale-110 transition-all duration-300"}`} />
                       </div>
-                      <span className="text-[7px] text-gold/30 tracking-widest uppercase">Mystery</span>
+                      <span className="text-[7px] text-gold/60 tracking-widest uppercase font-semibold">Mystery</span>
                     </div>
 
                     {/* 선택 순서 배지 */}
@@ -308,24 +323,32 @@ export default function TarotPage() {
                         위치: {posName}
                       </div>
 
-                      {/* CSS 기반 다이나믹 타로 카드 앞면 디자인 */}
-                      <div className={`aspect-[2/3.4] rounded-2xl p-4 bg-gradient-to-br ${meta.bg} border-2 ${meta.border} shadow-2xl relative flex flex-col justify-between overflow-hidden`}>
+                      {/* 카드 이미지 및 정보 오버레이 디자인 */}
+                      <div className={`aspect-[2/3.4] rounded-2xl bg-gradient-to-b ${meta.bg} border-2 ${meta.border} shadow-2xl relative flex flex-col justify-between overflow-hidden`}>
                         {/* 카드 역방향 텍스트 회전 가이드 */}
                         <div className={`w-full h-full flex flex-col justify-between transition-transform duration-500 ${item.isReversed ? "rotate-180" : ""}`}>
                           {/* 상단 기호 */}
-                          <div className="flex justify-between items-center text-[10px] text-gold/60 font-mono">
+                          <div className="flex justify-between items-center text-[10px] text-gold/80 font-mono p-3 z-10 bg-slate-950/40 backdrop-blur-xs">
                             <span>No. {item.card.id}</span>
-                            <span>{item.card.arcana === "major" ? "MAJOR" : "MINOR"}</span>
+                            <span className="font-bold">{item.card.arcana === "major" ? "MAJOR" : "MINOR"}</span>
                           </div>
 
-                          {/* 메인 아이콘 장식 */}
-                          <div className="self-center p-4 bg-slate-900/60 rounded-full border border-gold/15 backdrop-blur-xs flex items-center justify-center">
-                            {meta.icon}
+                          {/* 메인 일러스트레이션 이미지 */}
+                          <div className="flex-1 w-full relative overflow-hidden bg-slate-950 flex items-center justify-center">
+                            <img
+                              src={meta.imageUrl}
+                              alt={item.card.name}
+                              className="absolute inset-0 w-full h-full object-cover opacity-85 hover:scale-105 transition-transform duration-700 pointer-events-none"
+                            />
+                            {/* 이미지 내부 플로팅 아이콘 */}
+                            <div className="p-3 bg-slate-900/75 rounded-full border border-gold/20 backdrop-blur-xs z-10 shadow-md">
+                              {meta.icon}
+                            </div>
                           </div>
 
                           {/* 하단 카드 정보 지표 */}
-                          <div className="space-y-0.5 text-center">
-                            <span className="text-[9px] text-gold/50 font-bold uppercase tracking-wider block">{meta.label}</span>
+                          <div className="space-y-1 text-center p-3 bg-slate-950/70 border-t border-gold/15 backdrop-blur-xs z-10">
+                            <span className="text-[9px] text-gold font-bold uppercase tracking-wider block">{meta.label}</span>
                             <span className="text-[11px] text-slate-100 font-extrabold tracking-tight block">
                               {item.card.name}
                             </span>

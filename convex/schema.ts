@@ -32,13 +32,24 @@ export default defineSchema({
     id: v.string(),
     userId: v.union(v.string(), v.null()),
     anonymousSessionId: v.union(v.string(), v.null()),
-    name: v.string(),
-    gender: v.string(), // "male" | "female"
-    calendarType: v.string(), // "solar" | "lunar-solar" | "lunar-leap"
+    alias: v.string(),
+    relationship: v.string(), // "self" | "family" | "lover" | "friend" | "partner" | "other"
+    calendarType: v.string(), // "solar" | "lunar"
+    lunarLeapMonth: v.union(v.boolean(), v.null()),
     birthDate: v.string(), // "YYYY-MM-DD"
-    birthTime: v.string(), // "HH:MM"
-    birthPlace: v.string(),
-    isBirthTimeUnknown: v.boolean(),
+    birthTime: v.union(v.string(), v.null()), // "HH:MM"
+    unknownBirthTime: v.boolean(),
+    birthCountry: v.string(),
+    birthCity: v.string(),
+    timezone: v.string(),
+    latitude: v.union(v.number(), v.null()),
+    longitude: v.union(v.number(), v.null()),
+    genderRuleOption: v.string(), // "male" | "female" | "unspecified"
+    calculationPreference: v.object({
+      useTrueSolarTime: v.boolean(),
+      borderTimeRule: v.string()
+    }),
+    saveConsent: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),
     deletedAt: v.union(v.number(), v.null()),
