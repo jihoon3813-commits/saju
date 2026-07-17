@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Sun, Calendar, Heart, Sparkles, Moon, ChevronRight } from "lucide-react";
+import { Sun, Calendar, Heart, Sparkles, Moon, ChevronRight, BookOpen } from "lucide-react";
 import { ServiceItem } from "@/data/mockData";
 import { Badge } from "../ui/Badge";
 
@@ -23,6 +23,8 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
         return <Sparkles className={iconClass} />;
       case "Moon":
         return <Moon className={iconClass} />;
+      case "BookOpen":
+        return <BookOpen className={iconClass} />;
       default:
         return <Sparkles className={iconClass} />;
     }

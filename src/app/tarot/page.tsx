@@ -23,6 +23,31 @@ import {
 import { TAROT_SPREADS, SpreadConfig, TarotCard } from "@/lib/tarot/tarotEngine";
 import { runTarotReadingAction, TarotReadingResponse } from "@/app/actions/tarot";
 
+export function getTarotCardImageUrl(card: TarotCard): string {
+  if (card.arcana === "major") {
+    return `https://unpkg.com/tarot-card-img/major/${card.value}m.jpg`;
+  }
+  
+  const suit = card.suit; // "wands" | "cups" | "swords" | "pentacles"
+  const val = card.value; // 1 to 14
+  
+  let valKey = "";
+  if (val === 11) {
+    valKey = "p";
+  } else if (val === 12) {
+    valKey = "n";
+  } else if (val === 13) {
+    valKey = "q";
+  } else if (val === 14) {
+    valKey = "k";
+  } else {
+    valKey = val.toString();
+  }
+  
+  const suitLetter = suit ? suit.charAt(0) : ""; // 'w', 'c', 's', 'p'
+  return `https://unpkg.com/tarot-card-img/${suit}/${valKey}${suitLetter}.jpg`;
+}
+
 export default function TarotPage() {
   const breadcrumbs = [{ name: "AI 신비 타로", path: "/tarot" }];
 
@@ -228,7 +253,7 @@ export default function TarotPage() {
                     className={`group relative cursor-pointer aspect-[2/3.3] rounded-xl p-1.5 flex flex-col items-center justify-between text-center transition-all select-none border overflow-hidden ${
                       isSelected
                         ? "bg-gold/15 border-gold shadow-md scale-95"
-                        : "bg-slate-900 border-brand-border hover:border-gold/50 hover:-translate-y-1 hover:shadow-sm"
+                        : "bg-gradient-to-br from-indigo-950 via-slate-950 to-slate-900 border-brand-border hover:border-gold/50 hover:-translate-y-1 hover:shadow-sm"
                     }`}
                   >
                     {/* 카드 뒷면 우주 성운 텍스처 배경 */}
@@ -236,6 +261,7 @@ export default function TarotPage() {
                       <img 
                         src="https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=150" 
                         alt="카드 뒷면" 
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
                         className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500 pointer-events-none"
                       />
                     )}
@@ -325,19 +351,19 @@ export default function TarotPage() {
 
                       {/* 카드 이미지 및 정보 오버레이 디자인 */}
                       <div className={`aspect-[2/3.4] rounded-2xl bg-gradient-to-b ${meta.bg} border-2 ${meta.border} shadow-2xl relative flex flex-col justify-between overflow-hidden`}>
-                        {/* 카드 역방향 텍스트 회전 가이드 */}
-                        <div className={`w-full h-full flex flex-col justify-between transition-transform duration-500 ${item.isReversed ? "rotate-180" : ""}`}>
+                        <div className="w-full h-full flex flex-col justify-between">
                           {/* 상단 기호 */}
                           <div className="flex justify-between items-center text-[10px] text-gold/80 font-mono p-3 z-10 bg-slate-950/40 backdrop-blur-xs">
                             <span>No. {item.card.id}</span>
                             <span className="font-bold">{item.card.arcana === "major" ? "MAJOR" : "MINOR"}</span>
                           </div>
 
-                          {/* 메인 일러스트레이션 이미지 */}
-                          <div className="flex-1 w-full relative overflow-hidden bg-slate-950 flex items-center justify-center">
+                          {/* 메인 일러스트레이션 이미지 (역방향일 경우 이미지 영역만 회전) */}
+                          <div className={`flex-1 w-full relative overflow-hidden bg-slate-950 flex items-center justify-center transition-transform duration-500 ${item.isReversed ? "rotate-180" : ""}`}>
                             <img
-                              src={meta.imageUrl}
+                              src={getTarotCardImageUrl(item.card)}
                               alt={item.card.name}
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
                               className="absolute inset-0 w-full h-full object-cover opacity-85 hover:scale-105 transition-transform duration-700 pointer-events-none"
                             />
                             {/* 이미지 내부 플로팅 아이콘 */}

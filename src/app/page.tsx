@@ -1,14 +1,13 @@
 import React from "react";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
-import { ServiceCard } from "@/components/cards/ServiceCard";
-import { QuestionCard } from "@/components/cards/QuestionCard";
+import { SubServiceCard } from "@/components/cards/SubServiceCard";
 import { ArticleCard } from "@/components/cards/ArticleCard";
 import { TrustCard } from "@/components/cards/TrustCard";
 import { Button } from "@/components/ui/Button";
 import { AdSlot } from "@/components/ads/AdSlot";
-import { SERVICES, CONCERNS, ARTICLES } from "@/data/mockData";
-import { Moon, Star, ArrowRight, UserPlus, Sparkles, FolderOpen, Compass, Search } from "lucide-react";
+import { LANDING_CATEGORIES, ARTICLES } from "@/data/mockData";
+import { Moon, Star, ArrowRight, UserPlus, Sparkles, FolderOpen, Compass, Search, Calendar, Heart, BookOpen } from "lucide-react";
 import { db } from "@/lib/db";
 import { getCurrentUser, getOrCreateAnonymousSession } from "@/lib/auth";
 import { calculateManseChart, calculateTenGod, STEM_ELEMENTS } from "@/lib/manse/fourPillarsCalculator";
@@ -189,43 +188,58 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* 2. 빠른 시작 섹션 */}
-      <section>
-        <Container className="space-y-6">
-          <div className="flex items-end justify-between border-b border-brand-border pb-3">
-            <div>
-              <span className="text-xxs uppercase tracking-wider text-navy/40 font-bold">Quick Start</span>
-              <h2 className="text-xl sm:text-2xl font-bold text-navy mt-1">빠른 서비스 시작</h2>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {SERVICES.map((service) => (
-              <ServiceCard key={service.id} service={service} />
-            ))}
-          </div>
-        </Container>
-      </section>
+      {/* 2. 카테고리별 상세 운세 서비스 바로가기 */}
+      <section className="space-y-12">
+        {LANDING_CATEGORIES.map((category, index) => {
+          // 카테고리 아이콘 맵핑
+          const renderCategoryIcon = (iconName: string) => {
+            const iconClass = "w-5 h-5 text-gold";
+            switch (iconName) {
+              case "Calendar":
+                return <Calendar className={iconClass} />;
+              case "Sparkles":
+                return <Sparkles className={iconClass} />;
+              case "Moon":
+                return <Moon className={iconClass} />;
+              case "Heart":
+                return <Heart className={iconClass} />;
+              case "BookOpen":
+                return <BookOpen className={iconClass} />;
+              default:
+                return <Sparkles className={iconClass} />;
+            }
+          };
 
-      {/* 광고 슬롯 예약 1 */}
-      <AdSlot slotKey="home_after_cards" />
+          return (
+            <React.Fragment key={category.id}>
+              <section className="scroll-mt-20">
+                <Container className="space-y-5">
+                  <div className="flex items-start space-x-3 border-b border-brand-border/60 pb-3">
+                    <div className="p-2.5 bg-white border border-brand-border/60 rounded-xl shadow-xs">
+                      {renderCategoryIcon(category.iconName)}
+                    </div>
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold text-navy">
+                        {category.title}
+                      </h2>
+                      <p className="text-xxs sm:text-xs text-navy/55 font-medium mt-0.5 leading-relaxed">
+                        {category.description}
+                      </p>
+                    </div>
+                  </div>
 
-      {/* 3. 고민별 시작 섹션 */}
-      <section>
-        <Container className="space-y-6">
-          <div className="flex items-end justify-between border-b border-brand-border pb-3">
-            <div>
-              <span className="text-xxs uppercase tracking-wider text-navy/40 font-bold">Concern Areas</span>
-              <h2 className="text-xl sm:text-2xl font-bold text-navy mt-1">고민 해결 중심 시작</h2>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {CONCERNS.map((concern) => (
-              <QuestionCard key={concern.id} concern={concern} />
-            ))}
-          </div>
-        </Container>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4.5">
+                    {category.items.map((item, idx) => (
+                      <SubServiceCard key={idx} item={item} />
+                    ))}
+                  </div>
+                </Container>
+              </section>
+              {/* 첫 번째 카테고리(사주) 뒤에 자연스럽게 첫 번째 광고 슬롯 배치 */}
+              {index === 0 && <AdSlot slotKey="home_after_cards" />}
+            </React.Fragment>
+          );
+        })}
       </section>
 
       {/* 4. 개인화 영역 (동적 결합) */}

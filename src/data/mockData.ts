@@ -40,85 +40,87 @@ export interface DreamSample {
   category: string;
 }
 
-// 1. 빠른 시작 서비스 정보
-export const SERVICES: ServiceItem[] = [
-  {
-    id: "today-fortune",
-    title: "오늘의 운세",
-    description: "생년월일시와 오늘 일진의 상호작용으로 분석하는 정밀 일일 운의 흐름",
-    path: "/today",
-    iconName: "Sun",
-    isPopular: true,
-  },
+// 1. 빠른 시작 서비스 정보 (Deprecated)
+export const SERVICES: ServiceItem[] = [];
+
+// 2. 고민별 시작 카테고리 (Deprecated)
+export const CONCERNS: ConcernCategory[] = [];
+
+export interface SubServiceItem {
+  label: string;
+  href: string;
+  desc?: string;
+}
+
+export interface ServiceCategory {
+  id: string;
+  title: string;
+  description: string;
+  iconName: string;
+  items: SubServiceItem[];
+}
+
+// 2.5 메인 랜딩용 상단 메뉴 및 서브메뉴 카테고리 데이터
+export const LANDING_CATEGORIES: ServiceCategory[] = [
   {
     id: "saju",
-    title: "정통 만세력 사주",
-    description: "본인의 음양오행 비율, 십신(十神), 대운과 세운의 흐름까지 상세 계산",
-    path: "/saju",
+    title: "정통 명리학 사주",
+    description: "수천 년 검증된 만세력 규칙과 십신 격국 분석을 통해 인생의 사계절을 읽습니다.",
     iconName: "Calendar",
-    isPopular: true,
-  },
-  {
-    id: "compatibility",
-    title: "맞춤형 궁합",
-    description: "두 사람의 일간(日干) 대조 및 오행 상생상극을 통한 조화도 및 인연수 분석",
-    path: "/compatibility",
-    iconName: "Heart",
+    items: [
+      { label: "무료 만세력 조회", href: "/saju?type=manse", desc: "나의 여덟 글자와 오행 분포" },
+      { label: "평생 사주 종합", href: "/saju?type=pyungsaeng", desc: "타고난 격국과 오행 비율" },
+      { label: "10대 대운 흐름", href: "/saju?type=daewun", desc: "인생의 큰 전환기 타이밍" },
+      { label: "신년 신수 비결", href: "/saju?type=tojung", desc: "올해 일어날 주요 사건 예견" },
+      { label: "월간 종합 운세", href: "/saju?type=monthly", desc: "달마다 변화하는 길흉화복" },
+      { label: "오늘의 일진 상세", href: "/saju?type=today", desc: "가장 알맞은 행동 지침" },
+    ],
   },
   {
     id: "tarot",
-    title: "AI 타로",
-    description: "78장 메이저/마이너 아르카나 카드로 점치는 질문별 당면 과제와 조언",
-    path: "/tarot",
+    title: "AI 신비 타로",
+    description: "78장의 아르카나 카드를 통해 당면한 고민의 무의식적 원인과 조언을 탐색합니다.",
     iconName: "Sparkles",
-    badge: "인기",
+    items: [
+      { label: "원 카드 (One Card)", href: "/tarot", desc: "오늘 하루에 대한 원포인트 조언" },
+      { label: "쓰리 카드 (과거/현재/미래)", href: "/tarot", desc: "문제 흐름의 종합적 진단" },
+      { label: "켈틱 크로스 스프레드", href: "/tarot", desc: "복잡한 문제의 심층 다각도 분석" },
+      { label: "그 사람의 속마음", href: "/tarot", desc: "연애운과 관계의 실마리" },
+      { label: "금전 이직의 양자택일", href: "/tarot", desc: "선택에 따른 예상 시나리오" },
+    ],
   },
   {
     id: "dreams",
-    title: "꿈해몽 사전",
-    description: "전통 상징물 분석과 현대 심리학적 의미를 결합한 국내 최다 꿈 키워드 검색",
-    path: "/dreams",
+    title: "상징 꿈해몽 사전",
+    description: "무의식이 보내는 신호를 현대 심리 분석과 동양 길흉 철학으로 번역합니다.",
     iconName: "Moon",
-  },
-];
-
-// 2. 고민별 시작 카테고리
-export const CONCERNS: ConcernCategory[] = [
-  {
-    id: "love",
-    title: "연애·관계",
-    description: "상대방의 속마음, 결혼수, 현재 인연의 깊이와 갈등 해결방안",
-    iconName: "HeartHandshake",
-    path: "/compatibility",
+    items: [
+      { label: "동물 꿈 (용, 돼지, 뱀)", href: "/dreams", desc: "태몽과 권세를 부르는 꿈" },
+      { label: "재물 꿈 (불, 똥, 물)", href: "/dreams", desc: "재수가 대통하는 대표 길몽" },
+      { label: "인물 꿈 (부모, 귀인, 연인)", href: "/dreams", desc: "인간관계와 조력의 메시지" },
+      { label: "길몽과 흉몽 구별법", href: "/articles", desc: "꿈의 느낌이 좌우하는 징조" },
+      { label: "태몽의 상징물 해석", href: "/articles", desc: "아이의 기질을 나타내는 꿈" },
+      { label: "심리 억압과 꿈의 관계", href: "/articles", desc: "스트레스가 유발하는 자각몽" },
+    ],
   },
   {
-    id: "money",
-    title: "재물·사업",
-    description: "투자 타이밍, 평생 재물 그릇 크기, 상업적 번창과 금전운의 향방",
-    iconName: "Coins",
-    path: "/saju",
+    id: "compatibility",
+    title: "인연 궁합",
+    description: "두 사람의 일간(日干) 대조 및 오행 상생상극을 통한 조화도 및 인연수 분석",
+    iconName: "Heart",
+    items: [
+      { label: "맞춤형 궁합 조회", href: "/compatibility", desc: "나와 상대방의 사주 결합 분석" }
+    ]
   },
   {
-    id: "career",
-    title: "직장·시험",
-    description: "승진운, 이직 시기, 합격수 및 나에게 맞는 진로와 직업 환경",
-    iconName: "Briefcase",
-    path: "/saju",
-  },
-  {
-    id: "family",
-    title: "가족·생활",
-    description: "가정 화합, 건강 지표, 이사 및 문서 계약에 길한 방향과 시기",
-    iconName: "Home",
-    path: "/saju",
-  },
-  {
-    id: "time",
-    title: "시간의 흐름",
-    description: "올해의 신수, 다가오는 10년 대운의 변화 시점 및 인생의 성수기",
-    iconName: "Hourglass",
-    path: "/today",
-  },
+    id: "articles",
+    title: "운세백과",
+    description: "명리 칼럼, 오행 정보, 신살 해설 등 방대한 명리 지식 저장소",
+    iconName: "BookOpen",
+    items: [
+      { label: "운세백과 전체 칼럼", href: "/articles", desc: "명리학 지식 및 해몽 팁 등 다양한 리서치" }
+    ]
+  }
 ];
 
 // 3. 추천 콘텐츠 (운세백과)
