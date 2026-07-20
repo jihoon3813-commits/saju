@@ -53,7 +53,7 @@ export const Footer: React.FC = () => {
               />
             </Link>
             <p className="text-xs text-cream/50 leading-relaxed max-w-[200px]">
-              수천 년 쌓인 명리학 공식과 최신 인공지능 해설을 융합한 동양 철학 프리미엄 매거진.
+              수천 년 역사와 정통 명리학 해법을 집대성하여 깊이 있는 분석을 선사하는 사주 전문 명리 매거진.
             </p>
           </div>
           

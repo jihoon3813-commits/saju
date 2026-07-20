@@ -7,7 +7,7 @@ import { Globe, Award, Sparkles, BookOpen } from "lucide-react";
 
 export const metadata: Metadata = getMetadata({
   title: "꿈과 운의 사전 소개",
-  description: "절기 기반 천문 규칙 만세력 엔진과 최신 AI 해설 기술로 구현한 명학 매거진 플랫폼 가치 소개",
+  description: "정통 명리학 공식에 입각한 정밀 만세력 계산 모듈과 심층 사주 해설을 제공하는 동양 철학 매거진 플랫폼 소개",
   canonicalPath: "/about",
 });
 
@@ -28,7 +28,7 @@ export default function AboutPage() {
             진정한 나를 마주하는 이정표
           </h1>
           <p className="text-sm text-navy/70 leading-relaxed">
-            ‘꿈과 운의 사전’은 수천 년 역사의 명리학 공식에 첨단 AI 기술을 입혀, 사용자가 자신의 성향을 객관적으로 파악하고 더 풍요로운 선택을 할 수 있도록 안내하는 현대적 동양 철학 정보 플랫폼입니다.
+            ‘꿈과 운의 사전’은 수천 년 역사의 자평명리학 공식에 현대적 해설 프레임워크를 적용하여, 사용자가 자신의 성향을 객관적으로 파악하고 인생의 방향을 찾도록 돕는 사주 전문 정보 플랫폼입니다.
           </p>
         </div>
 
@@ -56,9 +56,9 @@ export default function AboutPage() {
                 <Sparkles className="w-5 h-5" />
               </span>
               <div>
-                <h3 className="font-bold text-sm text-navy">생성형 AI 기술의 도덕적 활용</h3>
+                <h3 className="font-bold text-sm text-navy">명리학 대가의 분석 규칙에 근거한 해설</h3>
                 <p className="text-xs text-navy/75 leading-relaxed mt-1">
-                  도출된 사주 및 타로 데이터를 바탕으로 AI가 공감력 있고 읽기 쉬운 해설로 조율해 드립니다. 두려움을 유발하여 개운(開運) 물품 구매를 유도하는 자의적 해석을 배제합니다.
+                  도출된 사주 및 타로 데이터를 명리학 전문가들의 입증된 분석 패턴과 결합하여 깊이 있고 이해하기 쉬운 상세 간명지로 조율해 드립니다. 자의적인 공포 유발 해석이나 개운(開運) 물품 구매 유도를 철저히 배제합니다.
                 </p>
               </div>
             </div>

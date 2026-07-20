@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = getMetadata({
   title: "무료 사주, 무료 운세, 꿈해몽 사전",
-  description: "정밀 만세력 계산 엔진과 AI 심층 조언을 융합한 반응형 동양 철학 플랫폼. 나의 평생 사주, 대운 흐름, 신년 토정비결, 오늘의 운세, 꿈해몽 검색을 무료로 이용해 보세요.",
+  description: "정통 명리학 이론과 천문 절기 공식에 기반한 사주 전문 감명 플랫폼. 무료 사주, 무료 운세, 만세력 조회, 평생 사주, 신년 토정비결, 꿈해몽 검색 서비스를 전문적이고 깊이 있는 해설로 제공합니다.",
   canonicalPath: "/",
 });
 
@@ -169,8 +169,7 @@ export default async function HomePage() {
           </h1>
 
           <p className="text-sm sm:text-base text-white/80 max-w-xl mx-auto leading-relaxed font-medium">
-            막연한 예언 대신, 검증된 전통 명리학 알고리즘 산출 수치와 
-            최신 생성형 AI의 품격 있는 상황 분석을 직접 결합하여 확인하세요.
+            막연한 예언 대신, 한국천문연구원 황경 기준의 검증된 명리학 알고리즘과 정밀한 격국 용신 분석을 바탕으로 산출된 고품질 사주 분석 명식표와 전문 해설서로 미래를 설계해 보세요.
           </p>
 
           {/* 통합 검색바 입구 */}

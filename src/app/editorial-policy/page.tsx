@@ -7,7 +7,7 @@ import { CheckCircle2, ShieldAlert } from "lucide-react";
 
 export const metadata: Metadata = getMetadata({
   title: "콘텐츠 편집 원칙",
-  description: "꿈과 운의 사전 공포 유발 마케팅 배제 및 AI 윤리 가이드라인 가치 준수 선언",
+  description: "꿈과 운의 사전 공포 유발 마케팅 배제 및 신뢰성 높은 명리학 분석 가이드라인 준수 선언",
   canonicalPath: "/editorial-policy",
 });
 

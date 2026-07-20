@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "꿈과 운의 사전",
-  description: "만세력 계산 엔진과 AI 해석을 융합한 반응형 사주·운세 플랫폼",
+  description: "정통 명리학 공식에 기반한 고품질 사주 만세력 및 전문 운세 플랫폼",
 };
 
 export default function RootLayout({
