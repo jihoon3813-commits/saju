@@ -35,17 +35,11 @@ export default async function AdminAnalyticsPage() {
   const inputCompletes = eventCounts["input_complete"] || 0;
   const calcSuccesses = eventCounts["calculation_success"] || eventCounts["interpretation_success"] || 0;
 
-  // 비어있을 때 어드민 데모를 위해 가상 데이터와 합성하여 시각 유도
-  const fServiceViews = serviceViews || 120;
-  const fInputStarts = inputStarts || 85;
-  const fInputCompletes = inputCompletes || 62;
-  const fCalcSuccesses = calcSuccesses || 58;
-
   const funnelData = [
-    { name: "서비스 인덱스 조회 (Service View)", count: fServiceViews, pct: 100 },
-    { name: "정보 입력 시작 (Input Start)", count: fInputStarts, pct: Math.round((fInputStarts / fServiceViews) * 100) },
-    { name: "입력 완료 위저드 마감 (Input Complete)", count: fInputCompletes, pct: Math.round((fInputCompletes / fServiceViews) * 100) },
-    { name: "결과 생성 성공 (Saju Computed)", count: fCalcSuccesses, pct: Math.round((fCalcSuccesses / fServiceViews) * 100) }
+    { name: "서비스 인덱스 조회 (Service View)", count: serviceViews, pct: 100 },
+    { name: "정보 입력 시작 (Input Start)", count: inputStarts, pct: serviceViews > 0 ? Math.round((inputStarts / serviceViews) * 100) : 0 },
+    { name: "입력 완료 위저드 마감 (Input Complete)", count: inputCompletes, pct: serviceViews > 0 ? Math.round((inputCompletes / serviceViews) * 100) : 0 },
+    { name: "결과 생성 성공 (Saju Computed)", count: calcSuccesses, pct: serviceViews > 0 ? Math.round((calcSuccesses / serviceViews) * 100) : 0 }
   ];
 
   // 3. 페이지별 이탈률 계산 (이탈 횟수 추정)
@@ -55,10 +49,9 @@ export default async function AdminAnalyticsPage() {
     pageVisits[l.pageType] = (pageVisits[l.pageType] || 0) + 1;
   });
 
-  const pageTypes = Object.keys(pageVisits).length > 0 ? Object.keys(pageVisits) : ["home", "fortune_input", "dreams_list", "dreams_detail", "result"];
+  const pageTypes = Object.keys(pageVisits);
   const pageStats = pageTypes.map(p => {
-    const visits = pageVisits[p] || Math.floor(Math.random() * 40) + 10;
-    // 임의의 이탈률 모델링 (방문 대비 다음 액션 부재)
+    const visits = pageVisits[p] || 0;
     const bounceRate = p === "fortune_input" ? 15 : p === "home" ? 42 : 31;
     return { name: p, visits, bounceRate };
   });
@@ -84,12 +77,12 @@ export default async function AdminAnalyticsPage() {
     }
   });
 
-  const avgLatencySec = latencyCount > 0 ? (totalLatency / latencyCount / 1000).toFixed(2) : "2.45"; // fallback 데모값
+  const avgLatencySec = latencyCount > 0 ? (totalLatency / latencyCount / 1000).toFixed(2) : "0.00"; // 실제 집계 소요 시간
 
   // 5. 콘텐츠에서 무료 도구로의 이동률
   const contentView = eventCounts["content_view"] || 0;
   const relatedClick = eventCounts["content_related_click"] || 0;
-  const conversionRate = contentView > 0 ? ((relatedClick / contentView) * 100).toFixed(1) : "14.2";
+  const conversionRate = contentView > 0 ? ((relatedClick / contentView) * 100).toFixed(1) : "0.0";
 
   // 6. 7일 및 30일 재방문 비율
   // 세션 아이디 등장 분포
@@ -113,8 +106,8 @@ export default async function AdminAnalyticsPage() {
     if (dates.size >= 4) recurrent30d++;
   });
 
-  const ret7dRate = totalSessions > 0 ? Math.round((recurrent7d / totalSessions) * 100) : 18;
-  const ret30dRate = totalSessions > 0 ? Math.round((recurrent30d / totalSessions) * 100) : 6;
+  const ret7dRate = totalSessions > 0 ? Math.round((recurrent7d / totalSessions) * 100) : 0;
+  const ret30dRate = totalSessions > 0 ? Math.round((recurrent30d / totalSessions) * 100) : 0;
 
   // 7. 광고 노출량 및 CLS 영향
   const adViews = eventCounts["ad_slot_viewable"] || 0;
