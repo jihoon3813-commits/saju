@@ -11,8 +11,16 @@ import { Moon, Star, ArrowRight, UserPlus, Sparkles, FolderOpen, Compass, Search
 import { db } from "@/lib/db";
 import { getCurrentUser, getOrCreateAnonymousSession } from "@/lib/auth";
 import { calculateManseChart, calculateTenGod, STEM_ELEMENTS } from "@/lib/manse/fourPillarsCalculator";
+import { getMetadata, getWebSiteSchema } from "@/utils/seo";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = getMetadata({
+  title: "무료 사주, 무료 운세, 꿈해몽 사전",
+  description: "정밀 만세력 계산 엔진과 AI 심층 조언을 융합한 반응형 동양 철학 플랫폼. 나의 평생 사주, 대운 흐름, 신년 토정비결, 오늘의 운세, 꿈해몽 검색을 무료로 이용해 보세요.",
+  canonicalPath: "/",
+});
 
 export default async function HomePage() {
   // 대표글(첫 번째 글) 및 추천 글(나머지 5개 또는 6개)
@@ -128,6 +136,14 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-16 pb-20">
+      {/* Sitelinks Searchbox 구조화 데이터 삽입 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(getWebSiteSchema()),
+        }}
+      />
+
       {/* 1. 히어로 섹션 */}
       <section className="relative overflow-hidden bg-gold text-white pt-16 pb-20 md:py-24 border-b border-brand-border/20">
         {/* 미세한 전통 장식 그래픽 */}
@@ -146,10 +162,10 @@ export default async function HomePage() {
             <span>PREMIUM EASTERN PHILOSOPHY</span>
           </div>
           
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight text-white">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight text-white font-serif">
             오늘의 흐름부터 평생의 방향까지,
             <br />
-            <span className="text-white/95">근거를 확인할 수 있는 운세</span>
+            <span className="text-white/95">근거를 확인할 수 있는 무료 사주·운세·꿈해몽</span>
           </h1>
 
           <p className="text-sm sm:text-base text-white/80 max-w-xl mx-auto leading-relaxed font-medium">

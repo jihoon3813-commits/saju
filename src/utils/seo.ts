@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-const SITE_URL = "https://dreamfortune.com"; // 서비스 실제 상용 도메인 설정 예정
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://dreamfortune.com";
 
 interface MetadataParams {
   title: string;
@@ -19,7 +19,10 @@ export function getMetadata({
   noindex = false,
 }: MetadataParams): Metadata {
   const url = `${SITE_URL}${canonicalPath}`;
-  const fullTitle = `${title} | 꿈과 운의 사전`;
+  
+  // 타이틀에 이미 브랜드명이 포함되어 있는지 검증하여 중복 결합 방지
+  const brandName = "꿈과 운의 사전";
+  const fullTitle = title.includes(brandName) ? title : `${title} | ${brandName}`;
 
   return {
     title: fullTitle,
@@ -35,7 +38,7 @@ export function getMetadata({
       title: fullTitle,
       description,
       url,
-      siteName: "꿈과 운의 사전",
+      siteName: brandName,
       locale: "ko_KR",
       type: "website",
     },
@@ -44,6 +47,24 @@ export function getMetadata({
       title: fullTitle,
       description,
     },
+  };
+}
+
+/**
+ * Google 및 네이버용 Sitelinks Searchbox 구조화 데이터 스크립트 객체 생성 (JSON-LD)
+ */
+export function getWebSiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "꿈과 운의 사전",
+    "alternateName": ["무료 사주", "무료 운세", "꿈해몽 사전"],
+    "url": SITE_URL,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": `${SITE_URL}/search?q={search_term_string}`,
+      "query-input": "required name=search_term_string"
+    }
   };
 }
 

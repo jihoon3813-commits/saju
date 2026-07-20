@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 // Next.js 14/15/16 분리형 사이트맵 세그먼트 생성용 API
 export async function generateSitemaps() {
   return [
+    { id: "pages" },
     { id: "contents" },
     { id: "dreams" },
     { id: "glossary" }
@@ -14,7 +15,28 @@ export default async function sitemap({ id }: { id: string }): Promise<MetadataR
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
   try {
-    // 공개 발행 상태인 콘텐츠 조회
+    // 1. 핵심 랜딩 페이지 사이트맵 분기 처리
+    if (id === "pages") {
+      const corePages = [
+        "",
+        "/saju",
+        "/today",
+        "/compatibility",
+        "/tarot",
+        "/dreams",
+        "/articles",
+        "/about",
+        "/faq"
+      ];
+      return corePages.map((path) => ({
+        url: `${siteUrl}${path}`,
+        lastModified: new Date(),
+        changeFrequency: path === "" || path === "/today" ? "daily" : "weekly",
+        priority: path === "" ? 1.0 : 0.8
+      }));
+    }
+
+    // 2. 공개 발행 상태인 콘텐츠 조회
     const all = await db.contents.findByQuery({ status: "published" });
 
     let filtered = all;
