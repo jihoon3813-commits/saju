@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { handleEmailLogin, handleEmailSignup, handleSocialLoginMock } from "@/app/actions/auth";
+import { handleEmailLogin, handleEmailSignup, handleSocialLoginMock, getGoogleAuthConfig } from "@/app/actions/auth";
 import { LogIn, UserPlus, Mail, Lock, ShieldCheck } from "lucide-react";
 
 export default function LoginForm() {
@@ -12,6 +12,8 @@ export default function LoginForm() {
   const [isRegisterMode, setIsRegisterMode] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [showGoogleEmailInput, setShowGoogleEmailInput] = useState<boolean>(false);
+  const [googleEmail, setGoogleEmail] = useState<string>("");
 
   // 폼 상태
   const [email, setEmail] = useState("");
@@ -56,28 +58,41 @@ export default function LoginForm() {
     }
   };
 
-  // 2. 소셜 간편 로그인 모형 시뮬레이션
-  const handleSocialMockClick = async (provider: "google" | "kakao" | "naver") => {
+  // 구글 가입/로그인 처리
+  const handleGoogleClick = async () => {
     setLoading(true);
     setError(null);
-    
-    // 모의 소셜 이메일 매핑
-    const mockEmail = `mock-${provider}-${Math.floor(Math.random() * 900) + 100}@example.com`;
-
     try {
-      // 0.5초 가상 딜레이로 소셜 전환 애니메이션 유도
-      await new Promise((res) => setTimeout(res, 500));
-      
-      const result = await handleSocialLoginMock(mockEmail, provider);
-      if (result.success) {
-        // 소셜 성공 시 콜백 화면으로 모의 전환했다가 마이페이지로 이동하는 동적 전환 테스트 지원
-        router.push(`/auth/callback?provider=${provider}&email=${encodeURIComponent(mockEmail)}`);
+      const config = await getGoogleAuthConfig();
+      if (config.isConfigured) {
+        window.location.href = "/api/auth/google";
       } else {
-        setError(result.error || "소셜 가상 인증 실패");
+        setShowGoogleEmailInput(true);
         setLoading(false);
       }
     } catch (err: any) {
-      setError(err.message || "소셜 로그인 연동 에러");
+      setError(err.message || "구글 인증 시도 중 에러");
+      setLoading(false);
+    }
+  };
+
+  // 구글 개발용 폴백 제출 처리
+  const handleGoogleFallbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!googleEmail) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await handleSocialLoginMock(googleEmail, "google");
+      if (result.success) {
+        router.push(`/auth/callback?provider=google&email=${encodeURIComponent(googleEmail)}`);
+      } else {
+        setError(result.error || "구글 모의 가입 실패");
+        setLoading(false);
+      }
+    } catch (err: any) {
+      setError(err.message || "구글 모의 가입 에러");
       setLoading(false);
     }
   };
@@ -198,37 +213,58 @@ export default function LoginForm() {
         <div className="flex-grow border-t border-brand-border/60"></div>
       </div>
 
-      {/* 모의 소셜 로그인 버튼 집합 */}
+      {/* 소셜 로그인 (Google) */}
       <div className="space-y-2">
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() => handleSocialMockClick("kakao")}
-          className="w-full bg-[#FEE500] hover:bg-[#FEE500]/90 text-[#191919] font-bold py-2.5 rounded-xl text-xs transition-colors flex items-center justify-center space-x-2 min-h-[44px] cursor-pointer"
-        >
-          <span>💬</span>
-          <span>카카오 1초 간편 로그인</span>
-        </button>
-
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() => handleSocialMockClick("naver")}
-          className="w-full bg-[#03C75A] hover:bg-[#03C75A]/90 text-white font-bold py-2.5 rounded-xl text-xs transition-colors flex items-center justify-center space-x-2 min-h-[44px] cursor-pointer"
-        >
-          <span className="font-serif font-extrabold text-sm">N</span>
-          <span>네이버 아이디로 로그인</span>
-        </button>
-
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() => handleSocialMockClick("google")}
-          className="w-full bg-white hover:bg-cream/20 text-navy border border-brand-border font-bold py-2.5 rounded-xl text-xs transition-colors flex items-center justify-center space-x-2 min-h-[44px] cursor-pointer"
-        >
-          <span>🌐</span>
-          <span>Google 계정으로 가입</span>
-        </button>
+        {showGoogleEmailInput ? (
+          <form onSubmit={handleGoogleFallbackSubmit} className="space-y-3 p-4 bg-[#EAE4D6]/20 border border-brand-border/60 rounded-xl animate-fadeIn">
+            <p className="text-xxs font-bold text-navy/70 leading-relaxed">
+              [개발자 모드] 구글 Client ID가 설정되지 않았습니다. 테스트할 구글 이메일을 입력하세요:
+            </p>
+            <div className="relative">
+              <Mail className="absolute left-3 top-3 w-4 h-4 text-navy/40" />
+              <input
+                type="email"
+                required
+                placeholder="user@gmail.com"
+                value={googleEmail}
+                onChange={(e) => setGoogleEmail(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 border border-brand-border rounded-lg text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-gold min-h-[44px]"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowGoogleEmailInput(false);
+                  setError(null);
+                }}
+                disabled={loading}
+                className="flex-1 text-xs"
+              >
+                취소
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={loading || !googleEmail}
+                className="flex-1 text-xs"
+              >
+                {loading ? "처리 중..." : "가입 완료"}
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <button
+            type="button"
+            disabled={loading}
+            onClick={handleGoogleClick}
+            className="w-full bg-white hover:bg-cream/20 text-navy border border-brand-border font-bold py-2.5 rounded-xl text-xs transition-colors flex items-center justify-center space-x-2 min-h-[44px] cursor-pointer"
+          >
+            <span>🌐</span>
+            <span>Google 계정으로 가입</span>
+          </button>
+        )}
       </div>
 
       <div className="text-center pt-2">

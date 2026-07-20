@@ -99,3 +99,12 @@ export async function handleSocialLoginMock(email: string, provider: "google" | 
     return { success: false, error: err.message || "소셜 로그인 연동 중 에러가 발생했습니다." };
   }
 }
+
+/**
+ * 구글 OAuth 서버 설정 검사 액션
+ */
+export async function getGoogleAuthConfig() {
+  return {
+    isConfigured: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)
+  };
+}

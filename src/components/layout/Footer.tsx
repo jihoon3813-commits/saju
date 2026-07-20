@@ -36,7 +36,7 @@ export const Footer: React.FC = () => {
     { label: "이용약관", href: "/terms" },
     { label: "개인정보처리방침", href: "/privacy", isHighlight: true },
     { label: "광고·쿠키 안내", href: "/cookies" },
-    { label: "관리자 센터", href: "/admin" },
+    { label: "관리자 센터", href: "/admin", openInNewTab: true },
   ];
 
   return (
@@ -85,7 +85,10 @@ export const Footer: React.FC = () => {
           <div className="space-y-2 text-xs text-cream/45 leading-relaxed">
             <p>© 2026 꿈과 운의 사전. All Rights Reserved.</p>
             <p>
-              (주)꿈과운의사전 | 대표이사: 홍길동 | 서울특별시 강남구 테헤란로 123 | 사업자등록번호: 120-00-00000
+              (주)라이프앤조이 | 경기도 하남시 미사대로 510, 624호(아이에스비즈타워) | 사업자등록번호 : 388-86-02921
+            </p>
+            <p>
+              E-mail : lifenjoy0296@gmail.com | 개인정보보호책임자 : 김지훈(lifenjoy0296@gmail.co.kr)
             </p>
             <p className="text-[10px] text-cream/30">
               * 본 서비스에서 제공하는 운세 결과는 정통 명리학에 기반하되 삶의 참고용 정보로 활용해 주시기 바라며, 의료, 법률, 투자 등 전문 분야의 조언을 대신하지 않습니다.
@@ -97,6 +100,8 @@ export const Footer: React.FC = () => {
               <Link
                 key={idx}
                 href={link.href}
+                target={link.openInNewTab ? "_blank" : undefined}
+                rel={link.openInNewTab ? "noopener noreferrer" : undefined}
                 className={`hover:underline ${
                   link.isHighlight ? "text-gold font-bold" : "text-cream/60"
                 }`}
