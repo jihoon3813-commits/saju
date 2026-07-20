@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: DreamDetailPageProps) {
   const { slug } = await params;
   const content = await db.contents.findBySlug(slug);
 
-  if (!content || content.type !== "dream") {
+  if (!content || (content.type !== "dream" && content.type !== "guide")) {
     return {
       title: "존재하지 않는 페이지 - 꿈과 운의 사전"
     };
@@ -52,8 +52,8 @@ export default async function DreamDetailPage({ params }: DreamDetailPageProps) 
   const { slug } = await params;
   const content = await db.contents.findBySlug(slug);
 
-  // published 상태의 꿈해몽 글만 노출
-  if (!content || content.type !== "dream" || content.status !== "published") {
+  // published 상태의 꿈해몽 및 가이드 글 노출
+  if (!content || (content.type !== "dream" && content.type !== "guide") || content.status !== "published") {
     notFound();
   }
 
