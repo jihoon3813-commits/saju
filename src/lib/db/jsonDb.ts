@@ -888,6 +888,12 @@ class JsonAnalyticsLogRepository implements AnalyticsLogRepository {
     const db = readDb();
     return (db.analytics_logs || []).filter((al) => al.sessionId === sessionId);
   }
+
+  async clearAll(): Promise<void> {
+    const db = readDb();
+    db.analytics_logs = [];
+    writeDb(db);
+  }
 }
 
 class JsonProductRepository implements ProductRepository {

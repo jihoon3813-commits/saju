@@ -971,6 +971,11 @@ class PostgresAnalyticsLogRepository implements AnalyticsLogRepository {
     const res = await p.query("SELECT * FROM analytics_logs WHERE session_id = $1 ORDER BY created_at DESC", [sessionId]);
     return res.rows.map(mapAnalyticsLog);
   }
+
+  async clearAll(): Promise<void> {
+    const p = getPool();
+    await p.query("DELETE FROM analytics_logs");
+  }
 }
 
 // 로우 매핑 헬퍼 정의

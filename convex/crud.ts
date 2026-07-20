@@ -210,3 +210,14 @@ export const linkAnonymousToUser = mutation({
     return count;
   },
 });
+
+// 11. 테이블 전체 데이터 삭제 (Mutation)
+export const clearTable = mutation({
+  args: { table: v.string() },
+  handler: async (ctx, args) => {
+    const list = await ctx.db.query(args.table as any).collect();
+    for (const doc of list) {
+      await ctx.db.delete(doc._id);
+    }
+  },
+});

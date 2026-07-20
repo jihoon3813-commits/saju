@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNavigation } from "@/components/layout/MobileBottomNavigation";
 import { ConsentBanner } from "@/components/consent/ConsentBanner";
+import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-cream text-navy">
+        <AnalyticsTracker />
         <Header />
         <main className="flex-grow pb-16 md:pb-0">{children}</main>
         <Footer />

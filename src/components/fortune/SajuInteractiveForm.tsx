@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { calculateManseChart, STEM_ELEMENTS, BRANCH_ELEMENTS } from "@/lib/manse/fourPillarsCalculator";
 import { ChartResult } from "@/lib/manse/types";
 import { handleCreateProfile } from "@/app/actions/profile";
+import { trackEvent } from "@/lib/analytics/tracker";
 
 // 각 운세 하위 메뉴별 동적 메타 데이터 정의
 const TYPE_METAS: Record<string, { title: string; desc: string; buttonText: string }> = {
@@ -193,6 +194,8 @@ export default function SajuInteractiveForm() {
 
       const dbResult = await handleCreateProfile(profilePayload);
       if (dbResult.success && dbResult.profile) {
+        // 사주 정보 입력 완료 통계 적재 (비개인식별, force=true)
+        await trackEvent("input_complete", serviceType, { profileId: dbResult.profile.id }, true);
         // 성공 시 즉각 4단계 건너뛰고 결과 뷰로 리다이렉트!
         router.push(`/result/basic-saju/${dbResult.profile.id}?type=${serviceType}`);
       } else {

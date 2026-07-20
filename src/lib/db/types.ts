@@ -244,6 +244,7 @@ export interface AnalyticsLogRepository {
   findAll(): Promise<AnalyticsLog[]>;
   findByEventName(eventName: string): Promise<AnalyticsLog[]>;
   findBySessionId(sessionId: string): Promise<AnalyticsLog[]>;
+  clearAll(): Promise<void>;
 }
 
 // 12. 유료 리포트 상품 모델 정의

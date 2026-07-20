@@ -492,6 +492,9 @@ class ConvexAnalyticsLogRepository implements AnalyticsLogRepository {
     });
     return res.map((r: any) => fromConvexDoc("analyticsLogs", r));
   }
+  async clearAll() {
+    await client.mutation("crud:clearTable", { table: "analyticsLogs" });
+  }
 }
 
 class ConvexProductRepository implements ProductRepository {

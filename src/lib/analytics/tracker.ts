@@ -59,11 +59,11 @@ export function sanitizeProperties(props: Record<string, any> | undefined): Reco
 /**
  * 이벤트를 분석 서버(/api/analytics)로 전송합니다.
  */
-export async function trackEvent(eventName: string, pageType: string, properties?: Record<string, any>): Promise<void> {
+export async function trackEvent(eventName: string, pageType: string, properties?: Record<string, any>, force: boolean = false): Promise<void> {
   if (typeof window === "undefined") return;
 
-  // 1. 개인정보 동의(Analytics 쿠키) 여부 확인
-  if (!ConsentAdapter.hasAnalyticsConsent()) {
+  // 1. 개인정보 동의(Analytics 쿠키) 여부 확인 (force가 true면 통계를 위해 수집 우회)
+  if (!force && !ConsentAdapter.hasAnalyticsConsent()) {
     console.log(`[Analytics] Track event "${eventName}" blocked due to lack of consent.`);
     return;
   }
