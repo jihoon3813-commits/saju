@@ -19,6 +19,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "꿈과 운의 사전",
   description: "정통 명리학 공식에 기반한 고품질 사주 만세력 및 전문 운세 플랫폼",
+  verification: {
+    other: {
+      "naver-site-verification": "74c54ccaad17dc656a6e64be35fa04955cb3d47b",
+    },
+  },
 };
 
 export default function RootLayout({
