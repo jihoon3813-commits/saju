@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { handleEmailLogin, handleEmailSignup, handleSocialLoginMock, getGoogleAuthConfig } from "@/app/actions/auth";
+import { handleEmailLogin, handleEmailSignup } from "@/app/actions/auth";
 import { LogIn, UserPlus, Mail, Lock, ShieldCheck } from "lucide-react";
 
 export default function LoginForm() {
@@ -12,8 +12,6 @@ export default function LoginForm() {
   const [isRegisterMode, setIsRegisterMode] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [showGoogleEmailInput, setShowGoogleEmailInput] = useState<boolean>(false);
-  const [googleEmail, setGoogleEmail] = useState<string>("");
 
   // 폼 상태
   const [email, setEmail] = useState("");
@@ -58,44 +56,7 @@ export default function LoginForm() {
     }
   };
 
-  // 구글 가입/로그인 처리
-  const handleGoogleClick = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const config = await getGoogleAuthConfig();
-      if (config.isConfigured) {
-        window.location.href = "/api/auth/google";
-      } else {
-        setShowGoogleEmailInput(true);
-        setLoading(false);
-      }
-    } catch (err: any) {
-      setError(err.message || "구글 인증 시도 중 에러");
-      setLoading(false);
-    }
-  };
 
-  // 구글 개발용 폴백 제출 처리
-  const handleGoogleFallbackSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!googleEmail) return;
-    setLoading(true);
-    setError(null);
-
-    try {
-      const result = await handleSocialLoginMock(googleEmail, "google");
-      if (result.success) {
-        router.push(`/auth/callback?provider=google&email=${encodeURIComponent(googleEmail)}`);
-      } else {
-        setError(result.error || "구글 모의 가입 실패");
-        setLoading(false);
-      }
-    } catch (err: any) {
-      setError(err.message || "구글 모의 가입 에러");
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="bg-surface border border-brand-border rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
@@ -206,66 +167,7 @@ export default function LoginForm() {
         </Button>
       </form>
 
-      {/* 구분선 */}
-      <div className="relative flex py-2 items-center">
-        <div className="flex-grow border-t border-brand-border/60"></div>
-        <span className="flex-shrink mx-4 text-xxs font-semibold text-navy/40 uppercase tracking-widest">or social login</span>
-        <div className="flex-grow border-t border-brand-border/60"></div>
-      </div>
 
-      {/* 소셜 로그인 (Google) */}
-      <div className="space-y-2">
-        {showGoogleEmailInput ? (
-          <form onSubmit={handleGoogleFallbackSubmit} className="space-y-3 p-4 bg-[#EAE4D6]/20 border border-brand-border/60 rounded-xl animate-fadeIn">
-            <p className="text-xxs font-bold text-navy/70 leading-relaxed">
-              [개발자 모드] 구글 Client ID가 설정되지 않았습니다. 테스트할 구글 이메일을 입력하세요:
-            </p>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 w-4 h-4 text-navy/40" />
-              <input
-                type="email"
-                required
-                placeholder="user@gmail.com"
-                value={googleEmail}
-                onChange={(e) => setGoogleEmail(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 border border-brand-border rounded-lg text-sm bg-surface focus:outline-none focus:ring-1 focus:ring-gold min-h-[44px]"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setShowGoogleEmailInput(false);
-                  setError(null);
-                }}
-                disabled={loading}
-                className="flex-1 text-xs"
-              >
-                취소
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                disabled={loading || !googleEmail}
-                className="flex-1 text-xs"
-              >
-                {loading ? "처리 중..." : "가입 완료"}
-              </Button>
-            </div>
-          </form>
-        ) : (
-          <button
-            type="button"
-            disabled={loading}
-            onClick={handleGoogleClick}
-            className="w-full bg-white hover:bg-cream/20 text-navy border border-brand-border font-bold py-2.5 rounded-xl text-xs transition-colors flex items-center justify-center space-x-2 min-h-[44px] cursor-pointer"
-          >
-            <span>🌐</span>
-            <span>Google 계정으로 가입</span>
-          </button>
-        )}
-      </div>
 
       <div className="text-center pt-2">
         <p className="text-[10px] text-navy/50 leading-relaxed flex items-center justify-center space-x-1">
