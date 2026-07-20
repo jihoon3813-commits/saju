@@ -61,23 +61,40 @@ export default function SajuInteractiveForm() {
       const searchParams = new URLSearchParams(window.location.search);
       const t = searchParams.get("type") || "pyungsaeng";
       setServiceType(t);
+
+      const savedInputs = localStorage.getItem("user_saju_inputs");
+      if (savedInputs) {
+        try {
+          const parsed = JSON.parse(savedInputs);
+          if (parsed && parsed.year) {
+            setInputs(parsed);
+          }
+        } catch (e) {
+          console.error("Failed to parse saved saju inputs:", e);
+        }
+      }
     }
   }, []);
 
-  // 1. 입력 폼 상태 (기본값: 이미지와 동일하게 1995년 10월 24일 세팅)
+  // 1. 입력 폼 상태 (기본값: 비어있음)
   const [inputs, setInputs] = useState({
-    year: 1995,
-    month: 10,
-    day: 24,
-    birthTime: "none",
-    calendarType: "solar" as "solar" | "lunar",
-    gender: "male" as "male" | "female"
+    year: 0,
+    month: 0,
+    day: 0,
+    birthTime: "",
+    calendarType: "" as "solar" | "lunar" | "",
+    gender: "" as "male" | "female" | ""
   });
 
   const [chart, setChart] = useState<ChartResult | null>(null);
 
-  // 2. 실시간 만세력 연산 트리거
+  // 2. 실시간 만세력 연산 트리거 및 로컬스토리지 저장
   useEffect(() => {
+    if (!inputs.year || !inputs.month || !inputs.day || !inputs.gender || !inputs.calendarType || !inputs.birthTime) {
+      setChart(null);
+      return;
+    }
+
     try {
       const formattedMonth = String(inputs.month).padStart(2, "0");
       const formattedDay = String(inputs.day).padStart(2, "0");
@@ -85,8 +102,8 @@ export default function SajuInteractiveForm() {
 
       const res = calculateManseChart({
         alias: "미리보기",
-        genderRuleOption: inputs.gender,
-        calendarType: inputs.calendarType,
+        genderRuleOption: inputs.gender as "male" | "female",
+        calendarType: inputs.calendarType as "solar" | "lunar",
         lunarLeapMonth: false,
         birthDate: birthDateStr,
         birthTime: inputs.birthTime === "none" ? null : inputs.birthTime,
@@ -100,8 +117,11 @@ export default function SajuInteractiveForm() {
         borderTimeRule: "23"
       });
       setChart(res);
+
+      localStorage.setItem("user_saju_inputs", JSON.stringify(inputs));
     } catch (e) {
       console.error("실시간 명식 산출 실패:", e);
+      setChart(null);
     }
   }, [inputs]);
 
@@ -136,6 +156,12 @@ export default function SajuInteractiveForm() {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMsg(null);
+
+    if (!inputs.year || !inputs.month || !inputs.day || !inputs.gender || !inputs.calendarType || !inputs.birthTime) {
+      setErrorMsg("모든 사주 정보를 선택해 주세요.");
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const formattedMonth = String(inputs.month).padStart(2, "0");
@@ -241,9 +267,10 @@ export default function SajuInteractiveForm() {
             <label className="text-xxs font-bold text-navy/55 block mb-1">성별</label>
             <select
               value={inputs.gender}
-              onChange={(e) => setInputs((prev) => ({ ...prev, gender: e.target.value as "male" | "female" }))}
+              onChange={(e) => setInputs((prev) => ({ ...prev, gender: e.target.value as "male" | "female" | "" }))}
               className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold min-h-[44px]"
             >
+              <option value="">선택</option>
               <option value="male">남자</option>
               <option value="female">여자</option>
             </select>
@@ -254,9 +281,10 @@ export default function SajuInteractiveForm() {
             <label className="text-xxs font-bold text-navy/55 block mb-1">달력 유형</label>
             <select
               value={inputs.calendarType}
-              onChange={(e) => setInputs((prev) => ({ ...prev, calendarType: e.target.value as "solar" | "lunar" }))}
+              onChange={(e) => setInputs((prev) => ({ ...prev, calendarType: e.target.value as "solar" | "lunar" | "" }))}
               className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold min-h-[44px]"
             >
+              <option value="">선택</option>
               <option value="solar">양력</option>
               <option value="lunar">음력</option>
             </select>
@@ -267,10 +295,11 @@ export default function SajuInteractiveForm() {
             <div>
               <label className="text-xxs font-bold text-navy/55 block mb-1">년도</label>
               <select
-                value={inputs.year}
-                onChange={(e) => setInputs((prev) => ({ ...prev, year: parseInt(e.target.value) || 1995 }))}
+                value={inputs.year || ""}
+                onChange={(e) => setInputs((prev) => ({ ...prev, year: parseInt(e.target.value) || 0 }))}
                 className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold min-h-[44px]"
               >
+                <option value="">선택</option>
                 {YEAR_OPTIONS.map((y) => (
                   <option key={y} value={y}>{y}년</option>
                 ))}
@@ -279,10 +308,11 @@ export default function SajuInteractiveForm() {
             <div>
               <label className="text-xxs font-bold text-navy/55 block mb-1">월</label>
               <select
-                value={inputs.month}
-                onChange={(e) => setInputs((prev) => ({ ...prev, month: parseInt(e.target.value) || 10 }))}
+                value={inputs.month || ""}
+                onChange={(e) => setInputs((prev) => ({ ...prev, month: parseInt(e.target.value) || 0 }))}
                 className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold min-h-[44px]"
               >
+                <option value="">선택</option>
                 {MONTH_OPTIONS.map((m) => (
                   <option key={m} value={m}>{m}월</option>
                 ))}
@@ -291,10 +321,11 @@ export default function SajuInteractiveForm() {
             <div>
               <label className="text-xxs font-bold text-navy/55 block mb-1">일</label>
               <select
-                value={inputs.day}
-                onChange={(e) => setInputs((prev) => ({ ...prev, day: parseInt(e.target.value) || 24 }))}
+                value={inputs.day || ""}
+                onChange={(e) => setInputs((prev) => ({ ...prev, day: parseInt(e.target.value) || 0 }))}
                 className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold min-h-[44px]"
               >
+                <option value="">선택</option>
                 {DAY_OPTIONS.map((d) => (
                   <option key={d} value={d}>{d}일</option>
                 ))}
@@ -310,6 +341,7 @@ export default function SajuInteractiveForm() {
               onChange={(e) => setInputs((prev) => ({ ...prev, birthTime: e.target.value }))}
               className="w-full px-2.5 py-2 text-sm border border-brand-border rounded-lg bg-surface focus:outline-none focus:ring-1 focus:ring-gold min-h-[44px]"
             >
+              <option value="">선택</option>
               {TIME_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
@@ -342,8 +374,14 @@ export default function SajuInteractiveForm() {
         <div className="flex items-center justify-between border-b border-brand-border/60 pb-3">
           <h2 className="text-base font-bold text-navy">만세력 명식 분석 (샘플)</h2>
           <span className="text-xxs text-navy/55 font-semibold">
-            {inputs.year}년 {inputs.month}월 {inputs.day}일{" "}
-            {inputs.birthTime === "none" ? "시간 모름" : TIME_OPTIONS.find((t) => t.value === inputs.birthTime)?.label.split(" ")[0]} ({inputs.calendarType === "solar" ? "양력" : "음력"})
+            {inputs.year > 0 ? (
+              <>
+                {inputs.year}년 {inputs.month}월 {inputs.day}일{" "}
+                {inputs.birthTime === "none" ? "시간 모름" : TIME_OPTIONS.find((t) => t.value === inputs.birthTime)?.label?.split(" ")[0] || ""} ({inputs.calendarType === "solar" ? "양력" : "음력"})
+              </>
+            ) : (
+              "사주 정보 미입력"
+            )}
           </span>
         </div>
 
@@ -356,7 +394,7 @@ export default function SajuInteractiveForm() {
             {renderPillarCard(chart.pillars.year, "년주 (Year)", chart.tenGods.year)}
           </div>
         ) : (
-          <div className="text-center py-12 text-xxs text-navy/40">데이터 로딩 중...</div>
+          <div className="text-center py-12 text-xxs text-navy/40">사주 정보를 입력하시면 실시간 만세력 명식이 여기에 표시됩니다.</div>
         )}
 
         {/* 오행 그래프 */}
@@ -378,11 +416,11 @@ export default function SajuInteractiveForm() {
           })}
         </div>
 
-        {/* 동적 AI 조언 */}
+        {/* 동적 조언 */}
         <div className="bg-cream/40 border border-brand-border/60 p-4 rounded-xl flex items-start space-x-2.5">
           <Info className="w-4 h-4 text-gold mt-0.5 shrink-0" />
           <p className="text-xxs text-navy/75 leading-relaxed">
-            {chart ? getDynamicAdvice() : "조언 생성 중..."}
+            {chart ? getDynamicAdvice() : "사주 정보를 입력하시면 성향 분석에 따른 맞춤형 조언이 여기에 표시됩니다."}
           </p>
         </div>
       </div>
