@@ -31,8 +31,7 @@ export const Header: React.FC = () => {
     { label: "사주", href: "/saju", hasMega: true, category: "saju" },
     { label: "궁합", href: "/compatibility" },
     { label: "타로", href: "/tarot", hasMega: true, category: "tarot" },
-    { label: "꿈해몽", href: "/dreams", hasMega: true, category: "dreams" },
-    { label: "운세백과", href: "/articles" },
+    { label: "꿈해몽", href: "/dreams" },
   ];
 
   return (

@@ -75,7 +75,7 @@ export const DesktopMegaMenu: React.FC<DesktopMegaMenuProps> = ({
       ],
     },
     tarot: {
-      title: "AI 신비 타로",
+      title: "신비 타로 운세",
       desc: "78장의 아르카나 카드를 통해 당면한 고민의 무의식적 원인과 조언을 탐색합니다.",
       icon: <Sparkles className="w-5 h-5 text-gold" />,
       groups: [

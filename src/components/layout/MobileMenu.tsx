@@ -26,9 +26,8 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
     { label: "오늘의 운세", href: "/today", icon: <Calendar className="w-5 h-5 text-gold" /> },
     { label: "정통 사주", href: "/saju", icon: <Calendar className="w-5 h-5 text-gold" /> },
     { label: "맞춤 궁합", href: "/compatibility", icon: <Heart className="w-5 h-5 text-gold" /> },
-    { label: "AI 타로", href: "/tarot", icon: <Sparkles className="w-5 h-5 text-gold" /> },
+    { label: "타로 운세", href: "/tarot", icon: <Sparkles className="w-5 h-5 text-gold" /> },
     { label: "꿈해몽 사전", href: "/dreams", icon: <Moon className="w-5 h-5 text-gold" /> },
-    { label: "운세백과", href: "/articles", icon: <BookOpen className="w-5 h-5 text-gold" /> },
   ];
 
   const infoMenus = [
