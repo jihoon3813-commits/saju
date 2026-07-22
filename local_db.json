@@ -15,6 +15,14 @@
       "createdAt": "2026-07-20T13:31:10.033Z",
       "updatedAt": "2026-07-20T13:31:10.033Z",
       "deletedAt": null
+    },
+    {
+      "id": "f12f6a22-d189-4152-8af7-1468ff583799",
+      "email": "test_admin_74084@dreamfortune.com",
+      "role": "admin",
+      "createdAt": "2026-07-22T14:38:04.404Z",
+      "updatedAt": "2026-07-22T14:38:04.404Z",
+      "deletedAt": null
     }
   ],
   "sessions": [],
@@ -38,6 +46,14 @@
       "bio": "약력",
       "avatarUrl": null,
       "createdAt": "2026-07-20T13:31:11.293Z"
+    },
+    {
+      "id": "8c979649-0c50-49a1-be1b-72faf5877a1f",
+      "name": "테스트필진",
+      "role": "에디터",
+      "bio": "약력",
+      "avatarUrl": null,
+      "createdAt": "2026-07-22T14:38:05.038Z"
     }
   ],
   "contents": [
@@ -98,6 +114,35 @@
       "createdAt": "2026-07-20T13:31:11.296Z",
       "updatedAt": "2026-07-20T13:31:11.300Z",
       "deletedAt": "2026-07-20T13:31:11.300Z"
+    },
+    {
+      "id": "70d1ef48-217d-4aff-a546-c695873d41d9",
+      "type": "article",
+      "title": "임시 글",
+      "slug": "temp-test-slug-qvfws3",
+      "excerpt": "요약",
+      "body": "본문",
+      "cluster": null,
+      "category": null,
+      "tags": [],
+      "searchIntent": null,
+      "primaryKeyword": null,
+      "relatedServiceIds": [],
+      "relatedContentIds": [],
+      "authorId": "8c979649-0c50-49a1-be1b-72faf5877a1f",
+      "reviewerId": null,
+      "status": "published",
+      "publishedAt": "2026-07-22T14:38:05.040Z",
+      "canonicalUrl": null,
+      "metaTitle": null,
+      "metaDescription": null,
+      "ogImage": null,
+      "schemaType": null,
+      "noindex": false,
+      "revision": 1,
+      "createdAt": "2026-07-22T14:38:05.041Z",
+      "updatedAt": "2026-07-22T14:38:05.044Z",
+      "deletedAt": "2026-07-22T14:38:05.044Z"
     }
   ],
   "ad_placements": [],
@@ -156,6 +201,18 @@
       "expiresAt": "2026-07-20T14:31:08.668Z",
       "id": "cd132ff4-b19f-4f0b-bce0-a5440765a28d",
       "createdAt": "2026-07-20T13:31:08.670Z"
+    },
+    {
+      "code": "TEST_COUPON_WVXO6L",
+      "discountType": "percent",
+      "discountValue": 10,
+      "maxUses": 2,
+      "usedCount": 2,
+      "active": true,
+      "productRestrictions": null,
+      "expiresAt": "2026-07-22T15:38:02.698Z",
+      "id": "c9ea94e4-565e-4661-960d-944f40b3aa3f",
+      "createdAt": "2026-07-22T14:38:02.698Z"
     }
   ],
   "orders": [
@@ -296,6 +353,75 @@
       "id": "614093f2-5903-4133-a9b5-b5d7458669ee",
       "createdAt": "2026-07-20T13:31:08.700Z",
       "updatedAt": "2026-07-20T13:31:08.700Z"
+    },
+    {
+      "userId": "user_a",
+      "productId": "00d4a6ba-76dd-4b8e-ac91-2e4f5742f4fb",
+      "priceVersionId": "674d03bd-c3bd-460d-9e6a-2ecdc74c4ff2",
+      "amount": 19900,
+      "currency": "KRW",
+      "status": "pending",
+      "paymentProvider": "mock",
+      "providerOrderId": null,
+      "idempotencyKey": "93e12052-b09e-4fd4-9eb1-9fbffe904dd7",
+      "chartId": "{\"profileId\":\"prof_dummy\"}",
+      "interpretationId": null,
+      "policyVersion": "1.0.0",
+      "couponId": null,
+      "refundReason": null,
+      "refundedAmount": null,
+      "refundedAt": null,
+      "paidAt": null,
+      "cancelledAt": null,
+      "id": "b9d67df2-4bab-46eb-b87f-c9056e74cb78",
+      "createdAt": "2026-07-22T14:38:02.712Z",
+      "updatedAt": "2026-07-22T14:38:02.712Z"
+    },
+    {
+      "userId": "user_a",
+      "productId": "00d4a6ba-76dd-4b8e-ac91-2e4f5742f4fb",
+      "priceVersionId": "674d03bd-c3bd-460d-9e6a-2ecdc74c4ff2",
+      "amount": 19900,
+      "currency": "KRW",
+      "status": "completed",
+      "paymentProvider": "mock",
+      "providerOrderId": null,
+      "idempotencyKey": "43ed4a7a-79ee-48d9-85ff-f2002128946c",
+      "chartId": "{\"profileId\":\"prof_dummy\"}",
+      "interpretationId": null,
+      "policyVersion": "1.0.0",
+      "couponId": null,
+      "refundReason": null,
+      "refundedAmount": null,
+      "refundedAt": null,
+      "paidAt": null,
+      "cancelledAt": null,
+      "id": "00540c79-31ec-4be4-8cba-b0c9d08835ee",
+      "createdAt": "2026-07-22T14:38:02.726Z",
+      "updatedAt": "2026-07-22T14:38:02.729Z"
+    },
+    {
+      "userId": "user_a",
+      "productId": "00d4a6ba-76dd-4b8e-ac91-2e4f5742f4fb",
+      "priceVersionId": "674d03bd-c3bd-460d-9e6a-2ecdc74c4ff2",
+      "amount": 19900,
+      "currency": "KRW",
+      "status": "pending",
+      "paymentProvider": "mock",
+      "providerOrderId": null,
+      "idempotencyKey": "cff100f5-bb6e-4f9b-b64b-6d8e1785a020",
+      "chartId": "{\"profileId\":\"prof_a\"}",
+      "interpretationId": null,
+      "policyVersion": "1.0.0",
+      "couponId": null,
+      "refundReason": null,
+      "refundedAmount": null,
+      "refundedAt": null,
+      "paidAt": null,
+      "cancelledAt": null,
+      "id": "d11dc004-8af7-4884-91d7-280ada331e8d",
+      "createdAt": "2026-07-22T14:38:02.732Z",
+      "updatedAt": "2026-07-22T14:38:02.732Z"
     }
   ],
   "coupon_uses": [],
@@ -322,6 +448,17 @@
       "status": "pending",
       "createdAt": "2026-07-20T13:31:10.040Z",
       "resolvedAt": null
+    },
+    {
+      "reportType": "payment",
+      "orderId": null,
+      "errorCode": "500",
+      "versionInfo": "engine=1.0.0",
+      "content": "카드번호 [CARD_MASKED] 결제가 안되고 오류코드 500이 뜹니다. 제 번호는 [PHONE_MASKED] 입니다.",
+      "id": "308efdac-bbb1-4160-a58b-edc9ab7e1e87",
+      "status": "pending",
+      "createdAt": "2026-07-22T14:38:04.409Z",
+      "resolvedAt": null
     }
   ],
   "audit_logs": [
@@ -342,6 +479,15 @@
       "userAgent": "Vitest Runner",
       "id": "fcbe40f5-e178-491a-8f3c-cc66c8ca170e",
       "createdAt": "2026-07-20T13:31:10.036Z"
+    },
+    {
+      "adminId": "f12f6a22-d189-4152-8af7-1468ff583799",
+      "adminEmail": "test_admin_74084@dreamfortune.com",
+      "action": "관리자 MFA OTP 가상 인증 완료",
+      "ipAddress": "127.0.0.1",
+      "userAgent": "Vitest Runner",
+      "id": "29ccea86-14fc-48fc-b61b-690cd1c684cd",
+      "createdAt": "2026-07-22T14:38:04.407Z"
     }
   ],
   "policy_versions": [

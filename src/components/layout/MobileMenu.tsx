@@ -1,6 +1,9 @@
+"use client";
+
 import React, { useEffect } from "react";
 import Link from "next/link";
 import { X, Calendar, Sparkles, Moon, Heart, BookOpen, User, LogIn, ChevronRight } from "lucide-react";
+import { useLogoType } from "@/utils/logo";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -8,6 +11,7 @@ interface MobileMenuProps {
 }
 
 export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
+  const { logoUrl } = useLogoType();
   // 모바일 메뉴 열렸을 때 뒷배경 스크롤 방지
   useEffect(() => {
     if (isOpen) {
@@ -52,7 +56,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
         <div className="flex items-center justify-between px-5 py-4.5 border-b border-brand-border">
           <Link href="/" onClick={onClose} className="flex items-center justify-center">
             <img 
-              src="https://res.cloudinary.com/dfkntvpmv/image/upload/v1784171074/Image_2_csmzku.png" 
+              src={logoUrl} 
               alt="꿈과 운의 사전" 
               className="h-7 w-auto object-contain"
             />

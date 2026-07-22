@@ -8,12 +8,14 @@ import { Container } from "./Container";
 import { DesktopMegaMenu } from "./DesktopMegaMenu";
 import { MobileMenu } from "./MobileMenu";
 import { Button } from "../ui/Button";
+import { useLogoType, LOGO_OPTIONS, LogoType } from "@/utils/logo";
 
 export const Header: React.FC = () => {
   const pathname = usePathname();
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [activeMegaCategory, setActiveMegaCategory] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { logoUrl, logoType, changeLogoType } = useLogoType();
 
   // 메가메뉴 제어 헬퍼
   const handleMegaMenuOpen = (category: string) => {
@@ -45,7 +47,7 @@ export const Header: React.FC = () => {
               className="focus:outline-none rounded px-1 flex items-center justify-center"
             >
               <img 
-                src="https://res.cloudinary.com/dfkntvpmv/image/upload/v1784171074/Image_2_csmzku.png" 
+                src={logoUrl} 
                 alt="꿈과 운의 사전" 
                 className="h-8 w-auto object-contain"
               />
@@ -94,6 +96,22 @@ export const Header: React.FC = () => {
 
           {/* 3. 우측 컨트롤 유틸리티 */}
           <div className="flex items-center space-x-2">
+            {/* 로고 타입 선택기 */}
+            <div className="relative mr-1">
+              <select
+                value={logoType}
+                onChange={(e) => changeLogoType(e.target.value as LogoType)}
+                className="text-[11px] font-bold text-navy/65 bg-cream/20 border border-brand-border/80 rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-gold/50 cursor-pointer min-h-[36px] font-sans"
+                title="로고 유형 선택"
+              >
+                {LOGO_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* 검색 버튼 */}
             <Link
               href="/search"
