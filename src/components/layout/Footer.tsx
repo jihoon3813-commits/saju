@@ -1,12 +1,8 @@
-"use client";
-
 import React from "react";
 import Link from "next/link";
 import { Container } from "./Container";
-import { useLogoType } from "@/utils/logo";
 
 export const Footer: React.FC = () => {
-  const { logoUrl } = useLogoType();
   const footerGroups = [
     {
       title: "서비스 전체",
@@ -51,7 +47,7 @@ export const Footer: React.FC = () => {
           <div className="col-span-2 md:col-span-1 space-y-4">
             <Link href="/" className="block">
               <img 
-                src={logoUrl} 
+                src="https://res.cloudinary.com/dfkntvpmv/image/upload/v1784171074/Image_2_csmzku.png" 
                 alt="꿈과 운의 사전" 
                 className="h-8 w-auto object-contain brightness-0 invert" 
               />
